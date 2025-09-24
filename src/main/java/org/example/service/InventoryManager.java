@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.dao.ProductDAO;
+import org.example.dao.ProductDAOImpl;
 import org.example.model.Product;
 
 import java.sql.SQLException;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InventoryManager {
-    private ProductDAO productDAO = new ProductDAO();
+    private ProductDAOImpl productDAOImpl = new ProductDAOImpl();
     private Scanner sc = new Scanner(System.in);
 
     public void start() {
@@ -60,12 +60,12 @@ public class InventoryManager {
         double price = sc.nextDouble();
 
         Product product = new Product(id, name, category, quantity, price);
-        productDAO.addProduct(product);
+        productDAOImpl.addProduct(product);
         System.out.println("Product added successfully!");
     }
 
     private void viewAllProducts() throws SQLException {
-        List<Product> products = productDAO.getAllProducts();
+        List<Product> products = productDAOImpl.getAllProducts();
         if (products.isEmpty()) {
             System.out.println("No products found!");
         } else {
@@ -76,7 +76,7 @@ public class InventoryManager {
     private void getProductById() throws SQLException {
         System.out.print("Enter Product ID: ");
         int id = sc.nextInt();
-        Product product = productDAO.getProductById(id);
+        Product product = productDAOImpl.getProductById(id);
         if (product != null) {
             System.out.println(product);
         } else {

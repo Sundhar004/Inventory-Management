@@ -13,5 +13,17 @@ public class DBConnection {
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
-}
+
+//        public void getConnect() {
+//            try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+//                if (conn != null) {
+//                    System.out.println("Database connected successfully!");
+//                } else {
+//                    System.out.println("Failed to make connection!");
+//                }
+//            } catch (SQLException e) {
+//                System.err.println("Connection error: " + e.getMessage());
+//            }
+//        }
+    }
 
