@@ -8,6 +8,10 @@ public interface ProductDAO {
     void addProduct(Product product) throws SQLException;
     List<Product> getAllProducts() throws SQLException;
     Product getProductById(int id) throws SQLException;
-    boolean updateProduct(int id, int newQuantity) throws SQLException;
+
+    // Update options
+    boolean updateProduct(Product product) throws SQLException;
+
     boolean deleteProduct(int id) throws SQLException;
+
 }

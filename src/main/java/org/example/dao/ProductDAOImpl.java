@@ -65,12 +65,17 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public boolean updateProduct(int id, int newQuantity) throws SQLException {
-        String query = "UPDATE products SET quantity = ? WHERE id = ?";
+    public boolean updateProduct(Product product) throws SQLException {
+        String sql = "UPDATE products SET name = ?, category = ?, quantity = ?, price = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement st = conn.prepareStatement(query)) {
-            st.setInt(1, newQuantity);
-            st.setInt(2, id);
+             PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setString(1, product.getName());
+            st.setString(2, product.getCategory());
+            st.setInt(3, product.getQuantity());
+            st.setDouble(4, product.getPrice());
+            st.setInt(5, product.getId());
+
             return st.executeUpdate() > 0;
         }
     }

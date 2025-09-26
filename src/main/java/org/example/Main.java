@@ -69,26 +69,93 @@ public class Main {
         System.out.println("Product added successfully!");
     }
 
-    private static void deleteItem() throws SQLException, ProductNotFoundException {
-        int id = readInt("Enter Product ID to delete: ");
-        boolean deleted = PRODUCT_DAO.deleteProduct(id);
-        if (deleted) {
-            System.out.println("Product deleted successfully!");
-        } else {
-            throw new ProductNotFoundException("Product with ID " + id + " not found.");
+    private static void deleteItem() throws SQLException, IOException, ProductNotFoundException {
+        System.out.println("\n===== Delete Menu =====");
+        System.out.println("1. Delete by ID");
+        System.out.println("2. Delete by Name");
+        int choice = readInt("Enter your choice: ");
+
+        switch (choice) {
+            case 1 -> {
+                int id = readInt("Enter Product ID: ");
+                PRODUCT_DAO.deleteProduct(id);
+                System.out.println("✅ Product with ID " + id + " deleted.");
+            }
+            case 2 -> {
+                System.out.print("Enter Product Name: ");
+                String name = sc.nextLine().trim();
+                List<Product> allProducts = PRODUCT_DAO.getAllProducts();
+                List<Product> toDelete = allProducts.stream()
+                        .filter(p -> p.getName().equalsIgnoreCase(name))
+                        .toList();
+
+                if (toDelete.isEmpty()) {
+                    throw new ProductNotFoundException("No products found with name: " + name);
+                }
+
+                for (Product p : toDelete) {
+                    PRODUCT_DAO.deleteProduct(p.getId());
+                }
+                System.out.println("✅ All products named '" + name + "' deleted.");
+            }
+            default -> throw new InvalidInputException("Invalid delete option!");
         }
+
+        CSVHelper.saveProducts(PRODUCT_DAO.getAllProducts());
     }
 
-    private static void updateItem() throws SQLException, ProductNotFoundException {
+
+    private static void updateItem() throws SQLException, IOException, ProductNotFoundException {
         int id = readInt("Enter Product ID to update: ");
-        int newQuantity = readInt("Enter new Quantity: ");
-        boolean updated = PRODUCT_DAO.updateProduct(id, newQuantity);
-        if (updated) {
-            System.out.println("Product updated successfully!");
-        } else {
+        Product existing = PRODUCT_DAO.getProductById(id);
+        if (existing == null) {
             throw new ProductNotFoundException("Product with ID " + id + " not found.");
         }
+
+        System.out.println("\n===== Update Menu =====");
+        System.out.println("1. Update Name");
+        System.out.println("2. Update Category");
+        System.out.println("3. Update Quantity");
+        System.out.println("4. Update Price");
+        System.out.println("5. Update All Fields");
+        int choice = readInt("Enter your choice: ");
+
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter new name: ");
+                String newName = sc.nextLine().trim();
+                existing.setName(newName);
+            }
+            case 2 -> {
+                System.out.print("Enter new category: ");
+                String newCategory = sc.nextLine().trim();
+                existing.setCategory(newCategory);
+            }
+            case 3 -> {
+                int newQty = readInt("Enter new quantity: ");
+                existing.setQuantity(newQty);
+            }
+            case 4 -> {
+                double newPrice = readDouble("Enter new price: ");
+                existing.setPrice(newPrice);
+            }
+            case 5 -> {
+                System.out.print("Enter new name: ");
+                String newName = sc.nextLine().trim();
+                System.out.print("Enter new category: ");
+                String newCategory = sc.nextLine().trim();
+                int newQty = readInt("Enter new quantity: ");
+                double newPrice = readDouble("Enter new price: ");
+                existing = new Product(id, newName, newCategory, newQty, newPrice);
+            }
+            default -> throw new InvalidInputException("Invalid update option!");
+        }
+
+        PRODUCT_DAO.updateProduct(existing);
+        CSVHelper.saveProducts(PRODUCT_DAO.getAllProducts());
+        System.out.println("✅ Product updated successfully!");
     }
+
 
     private static void searchItem() throws SQLException, ProductNotFoundException {
         System.out.println("\n===== Search Menu =====");
