@@ -1,7 +1,7 @@
 package org.example.dao;
 
 import org.example.model.Product;
-import org.example.product.java.util.DBConnection;
+import org.example.product.java.util.DBConnection; // ✅ fixed import
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 public class ProductDAOImpl implements ProductDAO {
 
     @Override
-    public void addProduct(Product product) throws SQLException {
+    public boolean addProduct(Product product) throws SQLException {
         String query = "INSERT INTO products VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement st = conn.prepareStatement(query)) {
@@ -19,7 +19,7 @@ public class ProductDAOImpl implements ProductDAO {
             st.setString(3, product.getCategory());
             st.setInt(4, product.getQuantity());
             st.setDouble(5, product.getPrice());
-            st.executeUpdate();
+            return st.executeUpdate() > 0;
         }
     }
 
