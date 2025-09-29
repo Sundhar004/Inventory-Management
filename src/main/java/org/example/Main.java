@@ -77,8 +77,8 @@ public class Main {
     // ============ DELETE ITEM ============
     private static void deleteItem() throws SQLException, IOException, ProductNotFoundException {
         System.out.println("\n🗑️===== Delete Menu =====");
-        System.out.println("1️⃣  Delete by ID");
-        System.out.println("2️⃣  Delete by Name");
+        System.out.println("1️. Delete by ID");
+        System.out.println("2️. Delete by Name");
         int choice = readInt("👉 Enter your choice: ");
 
         switch (choice) {
