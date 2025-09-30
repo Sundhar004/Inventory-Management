@@ -75,40 +75,73 @@ public class Main {
     }
 
     // ============ DELETE ITEM ============
-    private static void deleteItem() throws SQLException, IOException, ProductNotFoundException {
+    private static void deleteItem() throws SQLException, ProductNotFoundException {
         System.out.println("\n🗑️===== Delete Menu =====");
         System.out.println("1️. Delete by ID");
         System.out.println("2️. Delete by Name");
+        System.out.println("3️. Delete by Category");
         int choice = readInt("👉 Enter your choice: ");
 
         switch (choice) {
             case 1 -> {
                 int id = readInt("🔑 Enter Product ID: ");
-                PRODUCT_DAO.deleteProduct(id);
-                System.out.println("✅ Product with ID " + id + " deleted.");
+                boolean deleted = PRODUCT_DAO.deleteProduct(id);
+                if (deleted) {
+                    System.out.println("✅ Product with ID " + id + " deleted successfully.");
+                } else {
+                    throw new ProductNotFoundException("⚠️ Product with ID " + id + " not found.");
+                }
             }
             case 2 -> {
                 System.out.print("🏷️ Enter Product Name: ");
                 String name = sc.nextLine().trim();
-                List<Product> allProducts = PRODUCT_DAO.getAllProducts();
-                List<Product> toDelete = allProducts.stream()
+                List<Product> products = PRODUCT_DAO.getAllProducts();
+                List<Product> toDelete = products.stream()
                         .filter(p -> p.getName().equalsIgnoreCase(name))
                         .toList();
 
                 if (toDelete.isEmpty()) {
-                    throw new ProductNotFoundException("⚠️ No products found with name: " + name);
+                    throw new ProductNotFoundException("⚠️ No product found with name: " + name);
+                } else {
+                    System.out.print("❓ Are you sure you want to delete ALL products named '" + name + "'? (y/n): ");
+                    String confirm = sc.nextLine().trim().toLowerCase();
+                    if (confirm.equals("y")) {
+                        for (Product p : toDelete) {
+                            PRODUCT_DAO.deleteProduct(p.getId());
+                        }
+                        System.out.println("✅ Deleted all products with name '" + name + "'.");
+                    } else {
+                        System.out.println("❎ Deletion cancelled.");
+                    }
                 }
+            }
+            case 3 -> {
+                System.out.print("📂 Enter Product Category: ");
+                String category = sc.nextLine().trim();
+                List<Product> products = PRODUCT_DAO.getAllProducts();
+                List<Product> toDelete = products.stream()
+                        .filter(p -> p.getCategory().equalsIgnoreCase(category))
+                        .toList();
 
-                for (Product p : toDelete) {
-                    PRODUCT_DAO.deleteProduct(p.getId());
+                if (toDelete.isEmpty()) {
+                    throw new ProductNotFoundException("⚠️ No products found in category: " + category);
+                } else {
+                    System.out.print("❓ Are you sure you want to delete ALL products in category '" + category + "'? (y/n): ");
+                    String confirm = sc.nextLine().trim().toLowerCase();
+                    if (confirm.equals("y")) {
+                        for (Product p : toDelete) {
+                            PRODUCT_DAO.deleteProduct(p.getId());
+                        }
+                        System.out.println("✅ Deleted all products in category '" + category + "'.");
+                    } else {
+                        System.out.println("❎ Deletion cancelled.");
+                    }
                 }
-                System.out.println("✅ All products named '" + name + "' deleted.");
             }
             default -> throw new InvalidInputException("⚠️ Invalid delete option!");
         }
-
-        CSVHelper.saveProducts(PRODUCT_DAO.getAllProducts());
     }
+
 
     // ============ UPDATE ITEM ============
     private static void updateItem() throws SQLException, IOException, ProductNotFoundException {
@@ -168,9 +201,10 @@ public class Main {
     // ============ SEARCH ITEM ============
     private static void searchItem() throws SQLException, ProductNotFoundException {
         System.out.println("\n🔍===== Search Menu =====");
-        System.out.println("1. Search by ID");
+        System.out.println("1️. Search by ID");
         System.out.println("2️. Search by Name");
-        System.out.println("3️. Get All Products");
+        System.out.println("3️. Search by Category");
+        System.out.println("4️. Get All Products");
         int choice = readInt("👉 Enter your choice: ");
 
         List<Product> matched = new ArrayList<>();
@@ -197,6 +231,17 @@ public class Main {
                 }
             }
             case 3 -> {
+                System.out.print("📂 Enter Product Category: ");
+                String category = sc.nextLine().trim();
+                List<Product> products = PRODUCT_DAO.getAllProducts();
+                matched = products.stream()
+                        .filter(p -> p.getCategory().equalsIgnoreCase(category))
+                        .toList();
+                if (matched.isEmpty()) {
+                    throw new ProductNotFoundException("⚠️ No products found in category: " + category);
+                }
+            }
+            case 4 -> {
                 matched = PRODUCT_DAO.getAllProducts();
                 if (matched.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No products available in the inventory.");

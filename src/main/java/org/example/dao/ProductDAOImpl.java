@@ -1,7 +1,7 @@
 package org.example.dao;
 
 import org.example.model.Product;
-import org.example.product.java.util.DBConnection; // ✅ fixed import
+import org.example.product.java.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,12 +14,23 @@ public class ProductDAOImpl implements ProductDAO {
         String query = "INSERT INTO products VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement st = conn.prepareStatement(query)) {
+
             st.setInt(1, product.getId());
             st.setString(2, product.getName());
             st.setString(3, product.getCategory());
             st.setInt(4, product.getQuantity());
             st.setDouble(5, product.getPrice());
+
             return st.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) { // Duplicate key
+                throw new SQLException("❌ Product with ID " + product.getId() + " already exists. Please use a unique ID.");
+            } else if (e.getErrorCode() == 1048) { // Null value in NOT NULL column
+                throw new SQLException("⚠️ One of the required fields (ID, Name, Category, Quantity, Price) is missing.");
+            } else {
+                throw new SQLException("💥 Failed to add product. Reason: " + e.getMessage());
+            }
         }
     }
 
@@ -30,6 +41,7 @@ public class ProductDAOImpl implements ProductDAO {
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(query)) {
+
             while (rs.next()) {
                 products.add(new Product(
                         rs.getInt("id"),
@@ -39,6 +51,8 @@ public class ProductDAOImpl implements ProductDAO {
                         rs.getDouble("price")
                 ));
             }
+        } catch (SQLException e) {
+            throw new SQLException("💥 Could not fetch product list. Please try again. (" + e.getMessage() + ")");
         }
         return products;
     }
@@ -48,6 +62,7 @@ public class ProductDAOImpl implements ProductDAO {
         String query = "SELECT * FROM products WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement st = conn.prepareStatement(query)) {
+
             st.setInt(1, id);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
@@ -58,10 +73,14 @@ public class ProductDAOImpl implements ProductDAO {
                             rs.getInt("quantity"),
                             rs.getDouble("price")
                     );
+                } else {
+                    throw new SQLException("🔍 No product found with ID " + id);
                 }
             }
+
+        } catch (SQLException e) {
+            throw new SQLException("💥 Failed to search for product ID " + id + ". Reason: " + e.getMessage());
         }
-        return null;
     }
 
     @Override
@@ -76,7 +95,14 @@ public class ProductDAOImpl implements ProductDAO {
             st.setDouble(4, product.getPrice());
             st.setInt(5, product.getId());
 
-            return st.executeUpdate() > 0;
+            int rows = st.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("⚠️ Update failed. No product found with ID " + product.getId());
+            }
+            return true;
+
+        } catch (SQLException e) {
+            throw new SQLException("💥 Could not update product ID " + product.getId() + ". Reason: " + e.getMessage());
         }
     }
 
@@ -85,8 +111,16 @@ public class ProductDAOImpl implements ProductDAO {
         String query = "DELETE FROM products WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement st = conn.prepareStatement(query)) {
+
             st.setInt(1, id);
-            return st.executeUpdate() > 0;
+            int rows = st.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("⚠️ Cannot delete. No product found with ID " + id);
+            }
+            return true;
+
+        } catch (SQLException e) {
+            throw new SQLException("💥 Could not delete product ID " + id + ". Reason: " + e.getMessage());
         }
     }
 }
