@@ -28,7 +28,7 @@ public class Product {
 
     public void setId(int id) {
         if (id <= 0) {
-            throw new InvalidInputException("❌ Product ID must be greater than 0.");
+            throw new InvalidInputException("🚫 ID must be positive!");
         }
         this.id = id;
     }
@@ -39,7 +39,7 @@ public class Product {
 
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new InvalidInputException("❌ Product name cannot be empty.");
+            throw new InvalidInputException("🚫 Name cannot be empty!");
         }
         this.name = name.trim();
     }
@@ -50,7 +50,7 @@ public class Product {
 
     public void setCategory(String category) {
         if (category == null || category.trim().isEmpty()) {
-            throw new InvalidInputException("❌ Category cannot be empty.");
+            throw new InvalidInputException("🚫 Category cannot be empty!");
         }
         this.category = category.trim();
     }
@@ -61,18 +61,21 @@ public class Product {
 
     public void setQuantity(int quantity) {
         if (quantity < 0) {
-            throw new InvalidInputException("❌ Quantity cannot be negative.");
+            throw new InvalidInputException("🚫 Quantity cannot be negative!");
         }
         this.quantity = quantity;
     }
 
     public double getPrice() {
+        if (price <= 0) {
+            throw new InvalidInputException("🚫 Price must be greater than 0");
+        }
         return price;
     }
 
     public void setPrice(double price) {
-        if (price < 0) {
-            throw new InvalidInputException("❌ Price cannot be negative.");
+        if (price <= 0) {
+            throw new InvalidInputException("🚫 Price must be greater than 0");
         }
         this.price = price;
     }
