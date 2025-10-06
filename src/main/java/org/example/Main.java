@@ -204,7 +204,8 @@ public class Main {
         System.out.println("1️. Search by ID");
         System.out.println("2️. Search by Name");
         System.out.println("3️. Search by Category");
-        System.out.println("4️. Get All Products");
+        System.out.println("4. Search by Price Range");
+        System.out.println("5. Get All Products");
         int choice = readInt("👉 Enter your choice: ");
 
         List<Product> matched = new ArrayList<>();
@@ -241,7 +242,16 @@ public class Main {
                     throw new ProductNotFoundException("⚠️ No products found in category: " + category);
                 }
             }
+
             case 4 -> {
+                double minPrice = readDouble("💲 Enter minimum price: ");
+                double maxPrice = readDouble("💲 Enter maximum price: ");
+                matched = PRODUCT_DAO.getAllProducts().stream()
+                        .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)
+                        .toList();
+            }
+
+            case 5 -> {
                 matched = PRODUCT_DAO.getAllProducts();
                 if (matched.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No products available in the inventory.");
