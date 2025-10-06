@@ -68,6 +68,28 @@ public class AppTest {
                     ex.getMessage().contains("No product found"));
         }
     }
+    @Test
+    public void testSearchProductByPriceRange() throws SQLException {
+        // Add sample data
+        Product p1 = new Product(103, "Earphones", "Electronics", 10, 150);
+        Product p2 = new Product(104, "Headphones", "Electronics", 8, 800);
+        dao.addProduct(p1);
+        dao.addProduct(p2);
+
+        // Search products within price range 100 to 500
+        List<Product> products = dao.getProductsByPriceRange(100, 500);
+
+        Assert.assertNotNull("Search result should not be null", products);
+        Assert.assertFalse("Search result should not be empty", products.isEmpty());
+
+        for (Product p : products) {
+            Assert.assertTrue(
+                    "Product price should be within range 100-500",
+                    p.getPrice() >= 100 && p.getPrice() <= 500
+            );
+        }
+    }
+
 
     @Test
     public void testGetAllProducts() throws SQLException {

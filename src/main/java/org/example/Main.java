@@ -273,19 +273,86 @@ public class Main {
         System.out.println("---------------------------------------------------------------");
     }
 
-    // ============ VIEW ALL ============
+    // ============ VIEW ALL (Paginated with Auto Exit) ============
     private static void viewAllItems() throws SQLException {
         List<Product> products = PRODUCT_DAO.getAllProducts();
-        System.out.println("\n📦===== Inventory Items =====");
-        System.out.printf("%-5s | %-15s | %-10s | %-8s | %-10s%n",
-                "ID", "Name", "Category", "Qty", "Price");
-        System.out.println("------------------------------------------------------------");
-        for (Product p : products) {
-            System.out.printf("%-5d | %-15s | %-10s | %-8d | %-10.2f%n",
-                    p.getId(), p.getName(), p.getCategory(),
-                    p.getQuantity(), p.getPrice());
+
+        if (products.isEmpty()) {
+            System.out.println("\n⚠️ No products found in the inventory.");
+            return;
+        }
+
+        final int PAGE_SIZE = 10; // Show 10 per page
+        int totalProducts = products.size();
+        int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);
+        int currentPage = 1;
+
+        while (true) {
+            int start = (currentPage - 1) * PAGE_SIZE;
+            int end = Math.min(start + PAGE_SIZE, totalProducts);
+            List<Product> currentPageProducts = products.subList(start, end);
+
+            System.out.println("\n📦===== Inventory Items (Page " + currentPage + " of " + totalPages + ") =====");
+            System.out.printf("%-5s | %-20s | %-15s | %-8s | %-10s%n",
+                    "ID", "Name", "Category", "Qty", "Price");
+            System.out.println("--------------------------------------------------------------------");
+
+            for (Product p : currentPageProducts) {
+                System.out.printf("%-5d | %-20s | %-15s | %-8d | %-10.2f%n",
+                        p.getId(), p.getName(), p.getCategory(),
+                        p.getQuantity(), p.getPrice());
+            }
+
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("Showing " + (start + 1) + " to " + end + " of " + totalProducts + " products.");
+
+            // ✅ Auto-return check
+            if (currentPage == totalPages) {
+                System.out.println("\n✅ End of list reached. Returning to main menu...");
+                break;
+            }
+
+            // Pagination control menu
+            System.out.println("\n➡️ Enter option:");
+            System.out.println("   n → Next page");
+            System.out.println("   p → Previous page");
+            System.out.println("   q → Quit view");
+            System.out.println("   or type a page number (1 - " + totalPages + ") to jump:");
+
+            String input = sc.nextLine().trim().toLowerCase();
+
+            if (input.equals("n")) {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                } else {
+                    System.out.println("⚠️ You are already on the last page.");
+                    System.out.println("👋 Returning to main menu...");
+                    break;
+                }
+            } else if (input.equals("p")) {
+                if (currentPage > 1) {
+                    currentPage--;
+                } else {
+                    System.out.println("⚠️ You are already on the first page.");
+                }
+            } else if (input.equals("q")) {
+                System.out.println("👋 Exiting product view...");
+                break;
+            } else {
+                try {
+                    int pageNum = Integer.parseInt(input);
+                    if (pageNum >= 1 && pageNum <= totalPages) {
+                        currentPage = pageNum;
+                    } else {
+                        System.out.println("⚠️ Invalid page number. Enter between 1 and " + totalPages + ".");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("⚠️ Invalid input. Please enter n, p, q, or a valid page number.");
+                }
+            }
         }
     }
+
 
     // ============ EXPORT ============
     private static void exportToCSV() throws SQLException, IOException {

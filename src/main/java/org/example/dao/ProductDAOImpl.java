@@ -10,6 +10,32 @@ import java.util.List;
 public class ProductDAOImpl implements ProductDAO {
 
     @Override
+    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException {
+        List<Product> products = new ArrayList<>();
+
+        String query = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(query)) {
+
+            ps.setDouble(1, minPrice);
+            ps.setDouble(2, maxPrice);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("category"),
+                        rs.getInt("quantity"),
+                        rs.getDouble("price")
+                );
+                products.add(p);
+            }
+        }
+        return products;
+    }
+
+    @Override
     public boolean addProduct(Product product) throws SQLException {
         String query = "INSERT INTO products VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
