@@ -1,0 +1,1737 @@
+Index: Inventory-Management/src/main/java/org/example/App.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example;\r\n\r\n//import org.example.service.InventoryManager;\r\n//\r\npublic class App {\r\n    public static void main(String[] args) {\r\n//        InventoryManager manager = new InventoryManager();\r\n//        manager.start();\r\n        Main.main(args);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/App.java b/Inventory-Management/src/main/java/org/example/App.java
+--- a/Inventory-Management/src/main/java/org/example/App.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/App.java	(date 1761143407213)
+@@ -1,11 +1,217 @@
+ package org.example;
+ 
+-//import org.example.service.InventoryManager;
+-//
++import org.example.dao.ProductDAOImpl;
++import org.example.dao.UserDAOImpl;
++import org.example.model.Product;
++import org.example.model.User;
++import org.example.service.EmailService;
++import org.example.service.StockAlertService;
++import org.example.util.CSVHelper;
++
++import java.util.List;
++import java.util.Scanner;
++
+ public class App {
++
++    private static final Scanner sc = new Scanner(System.in);
++    private static final UserDAOImpl userDAO = new UserDAOImpl();
++    private static final ProductDAOImpl productDAO = new ProductDAOImpl();
++
+     public static void main(String[] args) {
+-//        InventoryManager manager = new InventoryManager();
+-//        manager.start();
+-        Main.main(args);
++        while (true) {
++            System.out.println("\n=== 🔐 Authentication Menu ===");
++            System.out.println("1. Register");
++            System.out.println("2. Login");
++            System.out.println("3. Exit");
++            System.out.print("Enter choice: ");
++            int choice = sc.nextInt();
++            sc.nextLine();
++
++            switch (choice) {
++                case 1 -> registerUser();
++                case 2 -> {
++                    User user = loginUser();
++                    if (user != null) {
++                        if (user.getRole().equalsIgnoreCase("admin"))
++                            adminMenu();
++                        else
++                            userMenu();
++                    }
++                }
++                case 3 -> {
++                    System.out.println("👋 Exiting system...");
++                    return;
++                }
++                default -> System.out.println("⚠️ Invalid choice.");
++            }
++        }
++    }
++
++    // === USER AUTH ===
++    private static void registerUser() {
++        System.out.print("👤 Enter Username: ");
++        String username = sc.nextLine();
++        System.out.print("🔒 Enter Password: ");
++        String password = sc.nextLine();
++        System.out.print("🧩 Enter Role (admin/user): ");
++        String role = sc.nextLine();
++
++        userDAO.register(username, password, role);
++    }
++
++    private static User loginUser() {
++        System.out.print("👤 Username: ");
++        String username = sc.nextLine();
++        System.out.print("🔒 Password: ");
++        String password = sc.nextLine();
++
++        User user = userDAO.login(username, password);
++        if (user == null) {
++            System.out.println("❌ Invalid credentials!");
++        }
++        return user;
++    }
++
++    // === ADMIN MENU ===
++    private static void adminMenu() {
++        while (true) {
++            System.out.println("\n=== 🛠 ADMIN MENU ===");
++            System.out.println("1. Add Product");
++            System.out.println("2. View Products");
++            System.out.println("3. Search Product by ID");
++            System.out.println("4. Update Product");
++            System.out.println("5. Delete Product");
++            System.out.println("6. Filter Products by Price");
++            System.out.println("7. Generate CSV Report");
++            System.out.println("8. Send Email Report");
++            System.out.println("9. Exit");
++            System.out.println("10. Send Threshold Stock Alerts");
++            System.out.print("Enter choice: ");
++            int choice = sc.nextInt();
++            sc.nextLine();
++
++            try {
++                switch (choice) {
++                    case 1 -> productDAO.addProductFromInput();
++                    case 2 -> displayProducts();
++                    case 3 -> productDAO.searchProductById();
++                    case 4 -> productDAO.updateProductById();
++                    case 5 -> productDAO.deleteProductById();
++                    case 6 -> productDAO.filterByPriceRange();
++                    case 7 -> generateCSVReport();  // ✅ CSV using CSVHelper
++                    case 8 -> sendEmailReport();    // ✅ Calls EmailService
++                    case 9 -> {
++                        System.out.println("👋 Logging out from Admin...");
++                        return;
++                    }
++                    case 10 -> sendThresholdAlerts();
++                    default -> System.out.println("⚠️ Invalid option.");
++                }
++            } catch (Exception e) {
++                System.out.println("💥 Error: " + e.getMessage());
++                e.printStackTrace();
++            }
++        }
++    }
++
++    // === USER MENU ===
++    private static void userMenu() {
++        while (true) {
++            System.out.println("\n=== 🛒 USER MENU ===");
++            System.out.println("1. View Products");
++            System.out.println("2. Search Product by ID");
++            System.out.println("3. Filter by Price");
++            System.out.println("4. Generate CSV Report");
++            System.out.println("5. Exit");
++            System.out.print("Enter choice: ");
++            int choice = sc.nextInt();
++            sc.nextLine();
++
++            try {
++                switch (choice) {
++                    case 1 -> displayProducts();
++                    case 2 -> productDAO.searchProductById();
++                    case 3 -> productDAO.filterByPriceRange();
++                    case 4 -> generateCSVReport();  // ✅ CSV using CSVHelper
++                    case 5 -> {
++                        System.out.println("👋 Logging out...");
++                        return;
++                    }
++                    default -> System.out.println("⚠️ Invalid option.");
++                }
++            } catch (Exception e) {
++                System.out.println("💥 Error: " + e.getMessage());
++            }
++        }
++    }
++
++    // === DISPLAY PRODUCTS ===
++    private static void displayProducts() throws Exception {
++        List<Product> products = productDAO.getAllProducts();
++        if (products.isEmpty()) {
++            System.out.println("⚠️ No products found.");
++            return;
++        }
++
++        System.out.printf("%-5s %-15s %-15s %-10s %-10s%n", "ID", "Name", "Category", "Quantity", "Price");
++        System.out.println("-----------------------------------------------------------");
++        products.forEach(p ->
++                System.out.printf("%-5d %-15s %-15s %-10d %-10.2f%n",
++                        p.getId(), p.getName(), p.getCategory(), p.getQuantity(), p.getPrice()));
++    }
++
++    // === GENERATE CSV REPORT ===
++    private static void generateCSVReport() {
++        try {
++            List<Product> products = productDAO.getAllProducts();
++            if (products.isEmpty()) {
++                System.out.println("⚠️ No products to export.");
++                return;
++            }
++
++            // ✅ Display in console before saving
++            displayProducts();
++
++            // ✅ Save using CSVHelper
++            CSVHelper.saveProducts(products);
++//            System.out.println("\n✅ CSV report generated successfully: products.csv");
++
++        } catch (Exception e) {
++            System.out.println("💥 Failed to generate CSV: " + e.getMessage());
++        }
++    }
++
++    // === SEND EMAIL REPORT ===
++    private static void sendEmailReport() {
++        try {
++            System.out.print("📧 Enter recipient email address: ");
++            String recipient = sc.nextLine();
++
++            List<Product> products = productDAO.getAllProducts();
++            if (products.isEmpty()) {
++                System.out.println("⚠️ No products available to send.");
++                return;
++            }
++
++            // ✅ Call EmailService to send email
++            EmailService.sendProductReport(
++                    recipient,
++                    "📊 Inventory Product Report",
++                    "Attached is the latest product report from our inventory system."
++            );
++
++            System.out.println("✅ Email sent successfully to " + recipient);
++        } catch (Exception e) {
++            System.out.println("💥 Failed to send email: " + e.getMessage());
++        }
++    }
++    private static void sendThresholdAlerts() {
++        try {
++            System.out.print("📧 Enter recipient email address: ");
++            String recipient = sc.nextLine();
++            StockAlertService.sendLowStockAlerts(recipient);
++        } catch (Exception e) {
++            System.out.println("💥 Failed to send threshold alert: " + e.getMessage());
++        }
+     }
+ }
+Index: Inventory-Management/src/main/java/org/example/model/Product.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.model;\r\n\r\nimport org.example.exception.InvalidInputException;\r\n\r\npublic class Product {\r\n    private int id;\r\n    private String name;\r\n    private String category;\r\n    private int quantity;\r\n    private double price;\r\n\r\n    // Constructor with validations\r\n    public Product(int id, String name, String category, int quantity, double price) {\r\n        setId(id);\r\n        setName(name);\r\n        setCategory(category);\r\n        setQuantity(quantity);\r\n        setPrice(price);\r\n    }\r\n\r\n    // Default constructor\r\n    public Product() {}\r\n\r\n    // Getters and Setters with validations\r\n    public int getId() {\r\n        return id;\r\n    }\r\n\r\n    public void setId(int id) {\r\n        if (id <= 0) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB ID must be positive!\");\r\n        }\r\n        this.id = id;\r\n    }\r\n\r\n    public String getName() {\r\n        return name;\r\n    }\r\n\r\n    public void setName(String name) {\r\n        if (name == null || name.trim().isEmpty()) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB Name cannot be empty!\");\r\n        }\r\n        this.name = name.trim();\r\n    }\r\n\r\n    public String getCategory() {\r\n        return category;\r\n    }\r\n\r\n    public void setCategory(String category) {\r\n        if (category == null || category.trim().isEmpty()) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB Category cannot be empty!\");\r\n        }\r\n        this.category = category.trim();\r\n    }\r\n\r\n    public int getQuantity() {\r\n        return quantity;\r\n    }\r\n\r\n    public void setQuantity(int quantity) {\r\n        if (quantity < 0) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB Quantity cannot be negative!\");\r\n        }\r\n        this.quantity = quantity;\r\n    }\r\n\r\n    public double getPrice() {\r\n        if (price <= 0) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB Price must be greater than 0\");\r\n        }\r\n        return price;\r\n    }\r\n\r\n    public void setPrice(double price) {\r\n        if (price <= 0) {\r\n            throw new InvalidInputException(\"\uD83D\uDEAB Price must be greater than 0\");\r\n        }\r\n        this.price = price;\r\n    }\r\n\r\n    // For printing product details\r\n    @Override\r\n    public String toString() {\r\n        return \"\uD83D\uDCE6 Product {\" +\r\n                \"ID=\" + id +\r\n                \", Name='\" + name + '\\'' +\r\n                \", Category='\" + category + '\\'' +\r\n                \", Quantity=\" + quantity +\r\n                \", Price=\" + price +\r\n                '}';\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/model/Product.java b/Inventory-Management/src/main/java/org/example/model/Product.java
+--- a/Inventory-Management/src/main/java/org/example/model/Product.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/model/Product.java	(date 1761143057946)
+@@ -1,7 +1,5 @@
+ package org.example.model;
+ 
+-import org.example.exception.InvalidInputException;
+-
+ public class Product {
+     private int id;
+     private String name;
+@@ -9,86 +7,39 @@
+     private int quantity;
+     private double price;
+ 
+-    // Constructor with validations
+     public Product(int id, String name, String category, int quantity, double price) {
+-        setId(id);
+-        setName(name);
+-        setCategory(category);
+-        setQuantity(quantity);
+-        setPrice(price);
+-    }
+-
+-    // Default constructor
+-    public Product() {}
+-
+-    // Getters and Setters with validations
+-    public int getId() {
+-        return id;
+-    }
+-
+-    public void setId(int id) {
+-        if (id <= 0) {
+-            throw new InvalidInputException("🚫 ID must be positive!");
+-        }
+         this.id = id;
+-    }
+-
+-    public String getName() {
+-        return name;
++        this.name = name;
++        this.category = category;
++        this.quantity = quantity;
++        this.price = price;
+     }
+ 
+-    public void setName(String name) {
+-        if (name == null || name.trim().isEmpty()) {
+-            throw new InvalidInputException("🚫 Name cannot be empty!");
+-        }
+-        this.name = name.trim();
+-    }
+-
+-    public String getCategory() {
+-        return category;
+-    }
+-
+-    public void setCategory(String category) {
+-        if (category == null || category.trim().isEmpty()) {
+-            throw new InvalidInputException("🚫 Category cannot be empty!");
+-        }
+-        this.category = category.trim();
+-    }
+-
+-    public int getQuantity() {
+-        return quantity;
+-    }
+-
+-    public void setQuantity(int quantity) {
+-        if (quantity < 0) {
+-            throw new InvalidInputException("🚫 Quantity cannot be negative!");
+-        }
++    public Product(String name, String category, int quantity, double price) {
++        this.name = name;
++        this.category = category;
+         this.quantity = quantity;
+-    }
+-
+-    public double getPrice() {
+-        if (price <= 0) {
+-            throw new InvalidInputException("🚫 Price must be greater than 0");
+-        }
+-        return price;
+-    }
+-
+-    public void setPrice(double price) {
+-        if (price <= 0) {
+-            throw new InvalidInputException("🚫 Price must be greater than 0");
+-        }
+         this.price = price;
+     }
+ 
+-    // For printing product details
++    public int getId() { return id; }
++    public String getName() { return name; }
++    public String getCategory() { return category; }
++    public int getQuantity() { return quantity; }
++    public double getPrice() { return price; }
++
++    public void setId(int id) { this.id = id; }
++    public void setName(String name) { this.name = name; }
++    public void setCategory(String category) { this.category = category; }
++    public void setQuantity(int quantity) { this.quantity = quantity; }
++    public void setPrice(double price) { this.price = price; }
++
+     @Override
+     public String toString() {
+-        return "📦 Product {" +
+-                "ID=" + id +
+-                ", Name='" + name + '\'' +
+-                ", Category='" + category + '\'' +
+-                ", Quantity=" + quantity +
+-                ", Price=" + price +
+-                '}';
++        return String.format("Product{id=%d, name='%s', category='%s', qty=%d, price=%.2f}",
++                id, name, category, quantity, price);
+     }
++    private int threshold;
++    public int getThreshold() { return threshold; }
++    public void setThreshold(int threshold) { this.threshold = threshold; }
+ }
+Index: Inventory-Management/src/main/java/org/example/products.csv
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/products.csv b/Inventory-Management/src/main/java/org/example/products.csv
+deleted file mode 100644
+--- a/Inventory-Management/src/main/java/org/example/products.csv	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ /dev/null	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
+@@ -1,7 +0,0 @@
+-ID    | Name            | Category   | Qty      | Price     
+-------------------------------------------------------------
+-1     | Laptop          | Electronics | 10       | 5000.00   
+-4     | Chair           | Furniture  | 20       | 2500.00   
+-7     | Table           | Furniture  | 5        | 8000.00   
+-9     | Pen             | Stationery | 100      | 10.00     
+-10    | I Phone         | Electronics | 15       | 30000.00  
+Index: Inventory-Management/src/main/java/org/example/model/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/model/User.java b/Inventory-Management/src/main/java/org/example/model/User.java
+new file mode 100644
+--- /dev/null	(date 1760623538297)
++++ b/Inventory-Management/src/main/java/org/example/model/User.java	(date 1760623538297)
+@@ -0,0 +1,36 @@
++package org.example.model;
++
++public class User {
++    private int id;
++    private String username;
++    private String password;
++    private String role;
++
++    public User() {}
++    public User(String username, String password, String role) {
++        this.username = username;
++        this.password = password;
++        this.role = role;
++    }
++    public User(int id, String username, String password, String role) {
++        this.id = id;
++        this.username = username;
++        this.password = password;
++        this.role = role;
++    }
++
++    public int getId() { return id; }
++    public String getUsername() { return username; }
++    public String getPassword() { return password; }
++    public String getRole() { return role; }
++
++    public void setId(int id) { this.id = id; }
++    public void setUsername(String username) { this.username = username; }
++    public void setPassword(String password) { this.password = password; }
++    public void setRole(String role) { this.role = role; }
++
++    @Override
++    public String toString() {
++        return String.format("User{id=%d, username='%s', role='%s'}", id, username, role);
++    }
++}
+Index: Inventory-Management/src/main/java/org/example/util/CSVHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.util;\r\n\r\nimport org.example.model.Product;\r\n\r\nimport java.io.*;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\npublic class CSVHelper {\r\n\r\n    private static final String FILE_NAME = \"products.csv\";\r\n    private static final String DELIMITER = \" | \";\r\n\r\n    // Save products to CSV\r\n    public static void saveProducts(List<Product> products) throws IOException {\r\n        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {\r\n            // Write header\r\n            writer.write(String.format(\"%-5s%s%-15s%s%-10s%s%-8s%s%-10s\",\r\n                    \"ID\", DELIMITER, \"Name\", DELIMITER, \"Category\", DELIMITER, \"Qty\", DELIMITER, \"Price\"));\r\n            writer.newLine();\r\n            writer.write(\"------------------------------------------------------------\");\r\n            writer.newLine();\r\n\r\n            // Write each product\r\n            for (Product p : products) {\r\n                writer.write(String.format(\"%-5d%s%-15s%s%-10s%s%-8d%s%-10.2f\",\r\n                        p.getId(), DELIMITER, p.getName(), DELIMITER, p.getCategory(),\r\n                        DELIMITER, p.getQuantity(), DELIMITER, p.getPrice()));\r\n                writer.newLine();\r\n            }\r\n        }\r\n    }\r\n\r\n    // Load products from CSV\r\n    public static List<Product> loadProducts() throws IOException {\r\n        List<Product> products = new ArrayList<>();\r\n\r\n        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {\r\n            String line;\r\n            boolean firstTwoLines = true;\r\n\r\n            while ((line = reader.readLine()) != null) {\r\n                // Skip header + separator line\r\n                if (firstTwoLines) {\r\n                    firstTwoLines = false;\r\n                    continue;\r\n                }\r\n                if (line.startsWith(\"-\")) continue;\r\n\r\n                String[] parts = line.split(\"\\\\s*\\\\|\\\\s*\"); // split by \" | \"\r\n                if (parts.length == 5) {\r\n                    int id = Integer.parseInt(parts[0].trim());\r\n                    String name = parts[1].trim();\r\n                    String category = parts[2].trim();\r\n                    int qty = Integer.parseInt(parts[3].trim());\r\n                    double price = Double.parseDouble(parts[4].trim());\r\n\r\n                    products.add(new Product(id, name, category, qty, price));\r\n                }\r\n            }\r\n        }\r\n        return products;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/util/CSVHelper.java b/Inventory-Management/src/main/java/org/example/util/CSVHelper.java
+--- a/Inventory-Management/src/main/java/org/example/util/CSVHelper.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/util/CSVHelper.java	(date 1761048383036)
+@@ -8,46 +8,43 @@
+ 
+ public class CSVHelper {
+ 
+-    private static final String FILE_NAME = "products.csv";
+-    private static final String DELIMITER = " | ";
+-
+-    // Save products to CSV
+-    public static void saveProducts(List<Product> products) throws IOException {
+-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
++    // Save products to a specified CSV file
++    public static void saveProducts(List<Product> products, String filePath) throws IOException {
++        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+             // Write header
+-            writer.write(String.format("%-5s%s%-15s%s%-10s%s%-8s%s%-10s",
+-                    "ID", DELIMITER, "Name", DELIMITER, "Category", DELIMITER, "Qty", DELIMITER, "Price"));
+-            writer.newLine();
+-            writer.write("------------------------------------------------------------");
++            writer.write("ID,Name,Category,Quantity,Price");
+             writer.newLine();
+ 
+             // Write each product
+             for (Product p : products) {
+-                writer.write(String.format("%-5d%s%-15s%s%-10s%s%-8d%s%-10.2f",
+-                        p.getId(), DELIMITER, p.getName(), DELIMITER, p.getCategory(),
+-                        DELIMITER, p.getQuantity(), DELIMITER, p.getPrice()));
++                writer.write(String.format("%d,%s,%s,%d,%.2f",
++                        p.getId(), p.getName(), p.getCategory(), p.getQuantity(), p.getPrice()));
+                 writer.newLine();
+             }
+         }
++//        System.out.println("📄 CSV report saved successfully at: " + new File(filePath).getAbsolutePath());
++    }
++
++    // Overloaded method — default save to "products.csv"
++    public static void saveProducts(List<Product> products) throws IOException {
++        saveProducts(products, "products.csv");
+     }
+ 
+-    // Load products from CSV
+-    public static List<Product> loadProducts() throws IOException {
++    // Load products from CSV file
++    public static List<Product> loadProducts(String filePath) throws IOException {
+         List<Product> products = new ArrayList<>();
+ 
+-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
++        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+             String line;
+-            boolean firstTwoLines = true;
++            boolean isHeader = true;
+ 
+             while ((line = reader.readLine()) != null) {
+-                // Skip header + separator line
+-                if (firstTwoLines) {
+-                    firstTwoLines = false;
++                if (isHeader) {
++                    isHeader = false; // skip header
+                     continue;
+                 }
+-                if (line.startsWith("-")) continue;
+ 
+-                String[] parts = line.split("\\s*\\|\\s*"); // split by " | "
++                String[] parts = line.split(",");
+                 if (parts.length == 5) {
+                     int id = Integer.parseInt(parts[0].trim());
+                     String name = parts[1].trim();
+@@ -59,6 +56,13 @@
+                 }
+             }
+         }
++
++        System.out.println("📦 Loaded " + products.size() + " products from CSV: " + filePath);
+         return products;
+     }
++
++    // Overloaded default loader
++    public static List<Product> loadProducts() throws IOException {
++        return loadProducts("products.csv");
++    }
+ }
+Index: Inventory-Management/src/main/java/org/example/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example;\r\n\r\nimport org.example.dao.ProductDAO;\r\nimport org.example.dao.ProductDAOImpl;\r\nimport org.example.exception.DatabaseException;\r\nimport org.example.exception.InvalidInputException;\r\nimport org.example.exception.ProductNotFoundException;\r\nimport org.example.model.Product;\r\nimport org.example.util.CSVHelper;\r\n\r\nimport java.io.IOException;\r\nimport java.sql.SQLException;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\nimport java.util.Scanner;\r\n\r\npublic class Main {\r\n\r\n    private static final ProductDAO PRODUCT_DAO = new ProductDAOImpl();\r\n    private static final Scanner sc = new Scanner(System.in);\r\n\r\n    public static void main(String[] args) {\r\n        while (true) {\r\n            try {\r\n                System.out.println(\"\\n✨===== Inventory Menu =====✨\");\r\n                System.out.println(\"1\uFE0F. Add Item\");\r\n                System.out.println(\"2\uFE0F. Delete Item\");\r\n                System.out.println(\"3\uFE0F. Update Item\");\r\n                System.out.println(\"4\uFE0F. Search Item\");\r\n                System.out.println(\"5\uFE0F. View All Items\");\r\n                System.out.println(\"6\uFE0F. Export to CSV\");\r\n                System.out.println(\"7\uFE0F. Exit Inventory\");\r\n                int choice = readInt(\"\uD83D\uDC49 Enter your choice: \");\r\n\r\n                switch (choice) {\r\n                    case 1 -> addItem();\r\n                    case 2 -> deleteItem();\r\n                    case 3 -> updateItem();\r\n                    case 4 -> searchItem();\r\n                    case 5 -> viewAllItems();\r\n                    case 6 -> exportToCSV();\r\n                    case 7 -> {\r\n                        System.out.println(\"\uD83D\uDC4B Exiting... Goodbye!\");\r\n                        sc.close();\r\n                        return;\r\n                    }\r\n                    default -> throw new InvalidInputException(\"⚠\uFE0F Invalid menu choice! Try again.\");\r\n                }\r\n\r\n            } catch (InvalidInputException | ProductNotFoundException | DatabaseException e) {\r\n                System.err.println(\"❌ Error: \" + e.getMessage());\r\n            } catch (SQLException | IOException e) {\r\n                System.err.println(\"\uD83D\uDCA5 System Error: \" + e.getMessage());\r\n            }\r\n        }\r\n    }\r\n\r\n    // ============ ADD ITEM ============\r\n    private static void addItem() throws SQLException, DatabaseException {\r\n        System.out.println(\"\\n\uD83C\uDD95 Add New Product\");\r\n\r\n        int id = readInt(\"\uD83D\uDD11 Enter ID: \");\r\n        System.out.print(\"\uD83C\uDFF7\uFE0F Enter Name: \");\r\n        String name = sc.nextLine().trim();\r\n        System.out.print(\"\uD83D\uDCC2 Enter Category: \");\r\n        String category = sc.nextLine().trim();\r\n        int quantity = readInt(\"\uD83D\uDCE6 Enter Quantity: \");\r\n        double price = readDouble(\"\uD83D\uDCB2 Enter Price: \");\r\n\r\n        validateInputs(id, name, category, quantity, price);\r\n\r\n        Product p = new Product(id, name, category, quantity, price);\r\n        PRODUCT_DAO.addProduct(p);\r\n        System.out.println(\"✅ Product added successfully!\");\r\n    }\r\n\r\n    // ============ DELETE ITEM ============\r\n    private static void deleteItem() throws SQLException, ProductNotFoundException {\r\n        System.out.println(\"\\n\uD83D\uDDD1\uFE0F===== Delete Menu =====\");\r\n        System.out.println(\"1\uFE0F. Delete by ID\");\r\n        System.out.println(\"2\uFE0F. Delete by Name\");\r\n        System.out.println(\"3\uFE0F. Delete by Category\");\r\n        int choice = readInt(\"\uD83D\uDC49 Enter your choice: \");\r\n\r\n        switch (choice) {\r\n            case 1 -> {\r\n                int id = readInt(\"\uD83D\uDD11 Enter Product ID: \");\r\n                boolean deleted = PRODUCT_DAO.deleteProduct(id);\r\n                if (deleted) {\r\n                    System.out.println(\"✅ Product with ID \" + id + \" deleted successfully.\");\r\n                } else {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F Product with ID \" + id + \" not found.\");\r\n                }\r\n            }\r\n            case 2 -> {\r\n                System.out.print(\"\uD83C\uDFF7\uFE0F Enter Product Name: \");\r\n                String name = sc.nextLine().trim();\r\n                List<Product> products = PRODUCT_DAO.getAllProducts();\r\n                List<Product> toDelete = products.stream()\r\n                        .filter(p -> p.getName().equalsIgnoreCase(name))\r\n                        .toList();\r\n\r\n                if (toDelete.isEmpty()) {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F No product found with name: \" + name);\r\n                } else {\r\n                    System.out.print(\"❓ Are you sure you want to delete ALL products named '\" + name + \"'? (y/n): \");\r\n                    String confirm = sc.nextLine().trim().toLowerCase();\r\n                    if (confirm.equals(\"y\")) {\r\n                        for (Product p : toDelete) {\r\n                            PRODUCT_DAO.deleteProduct(p.getId());\r\n                        }\r\n                        System.out.println(\"✅ Deleted all products with name '\" + name + \"'.\");\r\n                    } else {\r\n                        System.out.println(\"❎ Deletion cancelled.\");\r\n                    }\r\n                }\r\n            }\r\n            case 3 -> {\r\n                System.out.print(\"\uD83D\uDCC2 Enter Product Category: \");\r\n                String category = sc.nextLine().trim();\r\n                List<Product> products = PRODUCT_DAO.getAllProducts();\r\n                List<Product> toDelete = products.stream()\r\n                        .filter(p -> p.getCategory().equalsIgnoreCase(category))\r\n                        .toList();\r\n\r\n                if (toDelete.isEmpty()) {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F No products found in category: \" + category);\r\n                } else {\r\n                    System.out.print(\"❓ Are you sure you want to delete ALL products in category '\" + category + \"'? (y/n): \");\r\n                    String confirm = sc.nextLine().trim().toLowerCase();\r\n                    if (confirm.equals(\"y\")) {\r\n                        for (Product p : toDelete) {\r\n                            PRODUCT_DAO.deleteProduct(p.getId());\r\n                        }\r\n                        System.out.println(\"✅ Deleted all products in category '\" + category + \"'.\");\r\n                    } else {\r\n                        System.out.println(\"❎ Deletion cancelled.\");\r\n                    }\r\n                }\r\n            }\r\n            default -> throw new InvalidInputException(\"⚠\uFE0F Invalid delete option!\");\r\n        }\r\n    }\r\n\r\n\r\n    // ============ UPDATE ITEM ============\r\n    private static void updateItem() throws SQLException, IOException, ProductNotFoundException {\r\n        int id = readInt(\"\uD83D\uDD11 Enter Product ID to update: \");\r\n        Product existing = PRODUCT_DAO.getProductById(id);\r\n        if (existing == null) {\r\n            throw new ProductNotFoundException(\"⚠\uFE0F Product with ID \" + id + \" not found.\");\r\n        }\r\n\r\n        System.out.println(\"\\n✏\uFE0F===== Update Menu =====\");\r\n        System.out.println(\"1\uFE0F. Update Name\");\r\n        System.out.println(\"2\uFE0F. Update Category\");\r\n        System.out.println(\"3\uFE0F. Update Quantity\");\r\n        System.out.println(\"4\uFE0F. Update Price\");\r\n        System.out.println(\"5\uFE0F. Update All Fields\");\r\n        int choice = readInt(\"\uD83D\uDC49 Enter your choice: \");\r\n\r\n        switch (choice) {\r\n            case 1 -> {\r\n                System.out.print(\"\uD83C\uDFF7\uFE0F Enter new name: \");\r\n                String newName = sc.nextLine().trim();\r\n                existing.setName(newName);\r\n            }\r\n            case 2 -> {\r\n                System.out.print(\"\uD83D\uDCC2 Enter new category: \");\r\n                String newCategory = sc.nextLine().trim();\r\n                existing.setCategory(newCategory);\r\n            }\r\n            case 3 -> {\r\n                int newQty = readInt(\"\uD83D\uDCE6 Enter new quantity: \");\r\n                existing.setQuantity(newQty);\r\n            }\r\n            case 4 -> {\r\n                double newPrice = readDouble(\"\uD83D\uDCB2 Enter new price: \");\r\n                existing.setPrice(newPrice);\r\n            }\r\n            case 5 -> {\r\n                System.out.print(\"\uD83C\uDFF7\uFE0F Enter new name: \");\r\n                String newName = sc.nextLine().trim();\r\n                System.out.print(\"\uD83D\uDCC2 Enter new category: \");\r\n                String newCategory = sc.nextLine().trim();\r\n                int newQty = readInt(\"\uD83D\uDCE6 Enter new quantity: \");\r\n                double newPrice = readDouble(\"\uD83D\uDCB2 Enter new price: \");\r\n                existing = new Product(id, newName, newCategory, newQty, newPrice);\r\n            }\r\n            default -> throw new InvalidInputException(\"⚠\uFE0F Invalid update option!\");\r\n        }\r\n\r\n        validateInputs(existing.getId(), existing.getName(),\r\n                existing.getCategory(), existing.getQuantity(), existing.getPrice());\r\n\r\n        PRODUCT_DAO.updateProduct(existing);\r\n        CSVHelper.saveProducts(PRODUCT_DAO.getAllProducts());\r\n        System.out.println(\"✅ Product updated successfully!\");\r\n    }\r\n\r\n    // ============ SEARCH ITEM ============\r\n    private static void searchItem() throws SQLException, ProductNotFoundException {\r\n        System.out.println(\"\\n\uD83D\uDD0D===== Search Menu =====\");\r\n        System.out.println(\"1\uFE0F. Search by ID\");\r\n        System.out.println(\"2\uFE0F. Search by Name\");\r\n        System.out.println(\"3\uFE0F. Search by Category\");\r\n        System.out.println(\"4. Search by Price Range\");\r\n        System.out.println(\"5. Get All Products\");\r\n        int choice = readInt(\"\uD83D\uDC49 Enter your choice: \");\r\n\r\n        List<Product> matched = new ArrayList<>();\r\n\r\n        switch (choice) {\r\n            case 1 -> {\r\n                int id = readInt(\"\uD83D\uDD11 Enter Product ID: \");\r\n                Product p = PRODUCT_DAO.getProductById(id);\r\n                if (p != null) {\r\n                    matched.add(p);\r\n                } else {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F Product with ID \" + id + \" not found.\");\r\n                }\r\n            }\r\n            case 2 -> {\r\n                System.out.print(\"\uD83C\uDFF7\uFE0F Enter Product Name: \");\r\n                String name = sc.nextLine().trim();\r\n                List<Product> products = PRODUCT_DAO.getAllProducts();\r\n                matched = products.stream()\r\n                        .filter(p -> p.getName().equalsIgnoreCase(name))\r\n                        .toList();\r\n                if (matched.isEmpty()) {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F No product found with name: \" + name);\r\n                }\r\n            }\r\n            case 3 -> {\r\n                System.out.print(\"\uD83D\uDCC2 Enter Product Category: \");\r\n                String category = sc.nextLine().trim();\r\n                List<Product> products = PRODUCT_DAO.getAllProducts();\r\n                matched = products.stream()\r\n                        .filter(p -> p.getCategory().equalsIgnoreCase(category))\r\n                        .toList();\r\n                if (matched.isEmpty()) {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F No products found in category: \" + category);\r\n                }\r\n            }\r\n\r\n            case 4 -> {\r\n                double minPrice = readDouble(\"\uD83D\uDCB2 Enter minimum price: \");\r\n                double maxPrice = readDouble(\"\uD83D\uDCB2 Enter maximum price: \");\r\n                matched = PRODUCT_DAO.getAllProducts().stream()\r\n                        .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)\r\n                        .toList();\r\n            }\r\n\r\n            case 5 -> {\r\n                matched = PRODUCT_DAO.getAllProducts();\r\n                if (matched.isEmpty()) {\r\n                    throw new ProductNotFoundException(\"⚠\uFE0F No products available in the inventory.\");\r\n                }\r\n            }\r\n            default -> throw new InvalidInputException(\"⚠\uFE0F Invalid search option!\");\r\n        }\r\n\r\n        // Print results in table format\r\n        System.out.println(\"\\n\uD83D\uDCCA===== Search Results =====\");\r\n        System.out.printf(\"%-5s | %-20s | %-15s | %-8s | %-10s%n\",\r\n                \"ID\", \"Name\", \"Category\", \"Qty\", \"Price\");\r\n        System.out.println(\"---------------------------------------------------------------\");\r\n        for (Product p : matched) {\r\n            System.out.printf(\"%-5d | %-20s | %-15s | %-8d | %-10.2f%n\",\r\n                    p.getId(), p.getName(), p.getCategory(),\r\n                    p.getQuantity(), p.getPrice());\r\n        }\r\n        System.out.println(\"---------------------------------------------------------------\");\r\n    }\r\n\r\n    // ============ VIEW ALL (Paginated with Auto Exit) ============\r\n    private static void viewAllItems() throws SQLException {\r\n        List<Product> products = PRODUCT_DAO.getAllProducts();\r\n\r\n        if (products.isEmpty()) {\r\n            System.out.println(\"\\n⚠\uFE0F No products found in the inventory.\");\r\n            return;\r\n        }\r\n\r\n        final int PAGE_SIZE = 10; // Show 10 per page\r\n        int totalProducts = products.size();\r\n        int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);\r\n        int currentPage = 1;\r\n\r\n        while (true) {\r\n            int start = (currentPage - 1) * PAGE_SIZE;\r\n            int end = Math.min(start + PAGE_SIZE, totalProducts);\r\n            List<Product> currentPageProducts = products.subList(start, end);\r\n\r\n            System.out.println(\"\\n\uD83D\uDCE6===== Inventory Items (Page \" + currentPage + \" of \" + totalPages + \") =====\");\r\n            System.out.printf(\"%-5s | %-20s | %-15s | %-8s | %-10s%n\",\r\n                    \"ID\", \"Name\", \"Category\", \"Qty\", \"Price\");\r\n            System.out.println(\"--------------------------------------------------------------------\");\r\n\r\n            for (Product p : currentPageProducts) {\r\n                System.out.printf(\"%-5d | %-20s | %-15s | %-8d | %-10.2f%n\",\r\n                        p.getId(), p.getName(), p.getCategory(),\r\n                        p.getQuantity(), p.getPrice());\r\n            }\r\n\r\n            System.out.println(\"--------------------------------------------------------------------\");\r\n            System.out.println(\"Showing \" + (start + 1) + \" to \" + end + \" of \" + totalProducts + \" products.\");\r\n\r\n            // ✅ Auto-return check\r\n            if (currentPage == totalPages) {\r\n                System.out.println(\"\\n✅ End of list reached. Returning to main menu...\");\r\n                break;\r\n            }\r\n\r\n            // Pagination control menu\r\n            System.out.println(\"\\n➡\uFE0F Enter option:\");\r\n            System.out.println(\"   n → Next page\");\r\n            System.out.println(\"   p → Previous page\");\r\n            System.out.println(\"   q → Quit view\");\r\n            System.out.println(\"   or type a page number (1 - \" + totalPages + \") to jump:\");\r\n\r\n            String input = sc.nextLine().trim().toLowerCase();\r\n\r\n            if (input.equals(\"n\")) {\r\n                if (currentPage < totalPages) {\r\n                    currentPage++;\r\n                } else {\r\n                    System.out.println(\"⚠\uFE0F You are already on the last page.\");\r\n                    System.out.println(\"\uD83D\uDC4B Returning to main menu...\");\r\n                    break;\r\n                }\r\n            } else if (input.equals(\"p\")) {\r\n                if (currentPage > 1) {\r\n                    currentPage--;\r\n                } else {\r\n                    System.out.println(\"⚠\uFE0F You are already on the first page.\");\r\n                }\r\n            } else if (input.equals(\"q\")) {\r\n                System.out.println(\"\uD83D\uDC4B Exiting product view...\");\r\n                break;\r\n            } else {\r\n                try {\r\n                    int pageNum = Integer.parseInt(input);\r\n                    if (pageNum >= 1 && pageNum <= totalPages) {\r\n                        currentPage = pageNum;\r\n                    } else {\r\n                        System.out.println(\"⚠\uFE0F Invalid page number. Enter between 1 and \" + totalPages + \".\");\r\n                    }\r\n                } catch (NumberFormatException e) {\r\n                    System.out.println(\"⚠\uFE0F Invalid input. Please enter n, p, q, or a valid page number.\");\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n\r\n    // ============ EXPORT ============\r\n    private static void exportToCSV() throws SQLException, IOException {\r\n        List<Product> products = PRODUCT_DAO.getAllProducts();\r\n        CSVHelper.saveProducts(products);\r\n        System.out.println(\"\uD83D\uDCC2 Data exported to products.csv successfully!\");\r\n    }\r\n\r\n    // ============ VALIDATION ============\r\n    private static void validateInputs(int id, String name, String category, int qty, double price) {\r\n        if (id <= 0) throw new InvalidInputException(\"\uD83D\uDEAB ID must be positive!\");\r\n        if (name == null || name.isBlank()) throw new InvalidInputException(\"\uD83D\uDEAB Name cannot be empty!\");\r\n        if (category == null || category.isBlank()) throw new InvalidInputException(\"\uD83D\uDEAB Category cannot be empty!\");\r\n        if (qty < 0) throw new InvalidInputException(\"\uD83D\uDEAB Quantity cannot be negative!\");\r\n        if (price < 0) throw new InvalidInputException(\"\uD83D\uDEAB Price cannot be negative!\");\r\n\r\n    }\r\n\r\n    // ============ SAFE INPUT HELPERS ============\r\n    private static int readInt(String prompt) {\r\n        while (true) {\r\n            System.out.print(prompt);\r\n            if (sc.hasNextInt()) {\r\n                int value = sc.nextInt();\r\n                sc.nextLine(); // consume newline\r\n                return value;\r\n            } else {\r\n                System.out.println(\"⚠\uFE0F Invalid input. Please enter a number.\");\r\n                sc.nextLine(); // clear invalid input\r\n            }\r\n        }\r\n    }\r\n\r\n    private static double readDouble(String prompt) {\r\n        while (true) {\r\n            System.out.print(prompt);\r\n            if (sc.hasNextDouble()) {\r\n                double value = sc.nextDouble();\r\n                sc.nextLine(); // consume newline\r\n                return value;\r\n            } else {\r\n                System.out.println(\"⚠\uFE0F Invalid input. Please enter a decimal number.\");\r\n                sc.nextLine(); // clear invalid input\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/Main.java b/Inventory-Management/src/main/java/org/example/Main.java
+--- a/Inventory-Management/src/main/java/org/example/Main.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/Main.java	(date 1759765142774)
+@@ -273,85 +273,62 @@
+         System.out.println("---------------------------------------------------------------");
+     }
+ 
+-    // ============ VIEW ALL (Paginated with Auto Exit) ============
++    // ✅ Pagination helper method
++    public static List<Product> getPaginatedProducts(List<Product> allProducts, int page, int pageSize) {
++        if (allProducts == null || allProducts.isEmpty()) {
++            return new ArrayList<>();
++        }
++
++        int total = allProducts.size();
++        int start = (page - 1) * pageSize;
++        int end = Math.min(start + pageSize, total);
++
++        if (start >= total || start < 0) {
++            return new ArrayList<>();
++        }
++
++        return allProducts.subList(start, end);
++    }
++
++
++    // ✅ View products with pagination
+     private static void viewAllItems() throws SQLException {
+         List<Product> products = PRODUCT_DAO.getAllProducts();
+ 
+         if (products.isEmpty()) {
+-            System.out.println("\n⚠️ No products found in the inventory.");
++            System.out.println("⚠️ No products available in the inventory.");
+             return;
+         }
+ 
+-        final int PAGE_SIZE = 10; // Show 10 per page
+-        int totalProducts = products.size();
+-        int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);
++        int pageSize = 10;
+         int currentPage = 1;
++        int totalPages = (int) Math.ceil((double) products.size() / pageSize);
+ 
+         while (true) {
+-            int start = (currentPage - 1) * PAGE_SIZE;
+-            int end = Math.min(start + PAGE_SIZE, totalProducts);
+-            List<Product> currentPageProducts = products.subList(start, end);
++            List<Product> pageProducts = getPaginatedProducts(products, currentPage, pageSize);
+ 
+-            System.out.println("\n📦===== Inventory Items (Page " + currentPage + " of " + totalPages + ") =====");
+-            System.out.printf("%-5s | %-20s | %-15s | %-8s | %-10s%n",
++            System.out.println("\n📦===== Inventory Page " + currentPage + " / " + totalPages + " =====");
++            System.out.printf("%-5s | %-15s | %-10s | %-8s | %-10s%n",
+                     "ID", "Name", "Category", "Qty", "Price");
+-            System.out.println("--------------------------------------------------------------------");
+-
+-            for (Product p : currentPageProducts) {
+-                System.out.printf("%-5d | %-20s | %-15s | %-8d | %-10.2f%n",
++            System.out.println("------------------------------------------------------------");
++            for (Product p : pageProducts) {
++                System.out.printf("%-5d | %-15s | %-10s | %-8d | %-10.2f%n",
+                         p.getId(), p.getName(), p.getCategory(),
+                         p.getQuantity(), p.getPrice());
+             }
+ 
+-            System.out.println("--------------------------------------------------------------------");
+-            System.out.println("Showing " + (start + 1) + " to " + end + " of " + totalProducts + " products.");
+-
+-            // ✅ Auto-return check
+-            if (currentPage == totalPages) {
+-                System.out.println("\n✅ End of list reached. Returning to main menu...");
+-                break;
+-            }
+-
+-            // Pagination control menu
+-            System.out.println("\n➡️ Enter option:");
+-            System.out.println("   n → Next page");
+-            System.out.println("   p → Previous page");
+-            System.out.println("   q → Quit view");
+-            System.out.println("   or type a page number (1 - " + totalPages + ") to jump:");
+-
++            System.out.println("------------------------------------------------------------");
++            System.out.println("Page " + currentPage + " of " + totalPages);
++            System.out.print("➡️ Next (n), ⬅️ Prev (p), or (q) Quit: ");
+             String input = sc.nextLine().trim().toLowerCase();
+ 
+-            if (input.equals("n")) {
+-                if (currentPage < totalPages) {
+-                    currentPage++;
+-                } else {
+-                    System.out.println("⚠️ You are already on the last page.");
+-                    System.out.println("👋 Returning to main menu...");
+-                    break;
+-                }
+-            } else if (input.equals("p")) {
+-                if (currentPage > 1) {
+-                    currentPage--;
+-                } else {
+-                    System.out.println("⚠️ You are already on the first page.");
+-                }
+-            } else if (input.equals("q")) {
+-                System.out.println("👋 Exiting product view...");
+-                break;
+-            } else {
+-                try {
+-                    int pageNum = Integer.parseInt(input);
+-                    if (pageNum >= 1 && pageNum <= totalPages) {
+-                        currentPage = pageNum;
+-                    } else {
+-                        System.out.println("⚠️ Invalid page number. Enter between 1 and " + totalPages + ".");
+-                    }
+-                } catch (NumberFormatException e) {
+-                    System.out.println("⚠️ Invalid input. Please enter n, p, q, or a valid page number.");
+-                }
+-            }
++            if (input.equals("n") && currentPage < totalPages) currentPage++;
++            else if (input.equals("p") && currentPage > 1) currentPage--;
++            else if (input.equals("q")) break;
++            else System.out.println("⚠️ Invalid input!");
+         }
+     }
++
+ 
+ 
+     // ============ EXPORT ============
+Index: Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java b/Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java
+new file mode 100644
+--- /dev/null	(date 1761047743338)
++++ b/Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java	(date 1761047743338)
+@@ -0,0 +1,153 @@
++package org.example.dao;
++
++import org.example.model.User;
++import org.example.product.java.util.DBConnection;
++
++import java.sql.*;
++import java.util.ArrayList;
++import java.util.List;
++
++public class UserDAOImpl implements UserDAO {
++
++    // 🔹 Register new user (wrapper around addUser)
++    public void register(String username, String password, String role) {
++        try {
++            User user = new User(0, username, password, role);
++            boolean success = addUser(user);
++            if (success) {
++                System.out.println("✅ User registered successfully!");
++            } else {
++                System.out.println("❌ Failed to register user.");
++            }
++        } catch (SQLException e) {
++            System.out.println("💥 Database error during registration: " + e.getMessage());
++        }
++    }
++
++    // 🔹 Login method for authentication
++    public User login(String username, String password) {
++        try {
++            User user = getUserByCredentials(username, password);
++            if (user != null) {
++                System.out.println("✅ Login successful! Welcome, " + user.getUsername());
++                return user;
++            } else {
++                System.out.println("❌ Invalid username or password.");
++                return null;
++            }
++        } catch (SQLException e) {
++            System.out.println("💥 Database error during login: " + e.getMessage());
++            return null;
++        }
++    }
++
++    // 🔹 Add user to database
++    @Override
++    public boolean addUser(User user) throws SQLException {
++        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setString(1, user.getUsername());
++            ps.setString(2, user.getPassword());
++            ps.setString(3, user.getRole());
++            return ps.executeUpdate() > 0;
++        }
++    }
++
++    // 🔹 Delete user by ID
++    @Override
++    public boolean deleteUser(int id) throws SQLException {
++        String sql = "DELETE FROM users WHERE id = ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setInt(1, id);
++            int rows = ps.executeUpdate();
++            return rows > 0;
++        }
++    }
++
++    // 🔹 Get user by ID
++    @Override
++    public User getUserById(int id) throws SQLException {
++        String sql = "SELECT * FROM users WHERE id = ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setInt(1, id);
++            ResultSet rs = ps.executeQuery();
++            if (rs.next()) {
++                return mapResultSetToUser(rs);
++            }
++        }
++        return null;
++    }
++
++    // 🔹 Get user by username
++    @Override
++    public User getUserByUsername(String username) throws SQLException {
++        String sql = "SELECT * FROM users WHERE username = ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setString(1, username);
++            ResultSet rs = ps.executeQuery();
++            if (rs.next()) {
++                return mapResultSetToUser(rs);
++            }
++        }
++        return null;
++    }
++
++    // 🔹 Get user by username + password (for login)
++    @Override
++    public User getUserByCredentials(String username, String password) throws SQLException {
++        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setString(1, username);
++            ps.setString(2, password);
++            ResultSet rs = ps.executeQuery();
++            if (rs.next()) {
++                return mapResultSetToUser(rs);
++            }
++        }
++        return null;
++    }
++
++    // 🔹 Update user details
++    @Override
++    public boolean updateUser(User user) throws SQLException {
++        String sql = "UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setString(1, user.getUsername());
++            ps.setString(2, user.getPassword());
++            ps.setString(3, user.getRole());
++            ps.setInt(4, user.getId());
++            return ps.executeUpdate() > 0;
++        }
++    }
++
++    // 🔹 Get all users
++    @Override
++    public List<User> getAllUsers() throws SQLException {
++        List<User> users = new ArrayList<>();
++        String sql = "SELECT * FROM users";
++        try (Connection conn = DBConnection.getConnection();
++             Statement stmt = conn.createStatement();
++             ResultSet rs = stmt.executeQuery(sql)) {
++            while (rs.next()) {
++                users.add(mapResultSetToUser(rs));
++            }
++        }
++        return users;
++    }
++
++    // 🔹 Utility: Convert ResultSet → User object
++    private User mapResultSetToUser(ResultSet rs) throws SQLException {
++        return new User(
++                rs.getInt("id"),
++                rs.getString("username"),
++                rs.getString("password"),
++                rs.getString("role")
++        );
++    }
++}
+Index: Inventory-Management/src/main/java/org/example/dao/UserDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/dao/UserDAO.java b/Inventory-Management/src/main/java/org/example/dao/UserDAO.java
+new file mode 100644
+--- /dev/null	(date 1760628228524)
++++ b/Inventory-Management/src/main/java/org/example/dao/UserDAO.java	(date 1760628228524)
+@@ -0,0 +1,16 @@
++package org.example.dao;
++
++import org.example.model.User;
++import java.sql.SQLException;
++import java.util.List;
++
++public interface UserDAO {
++
++    boolean addUser(User user) throws SQLException;
++    User getUserById(int id) throws SQLException;
++    User getUserByUsername(String username) throws SQLException;
++    List<User> getAllUsers() throws SQLException;
++    boolean updateUser(User user) throws SQLException;
++    boolean deleteUser(int id) throws SQLException;
++    User getUserByCredentials(String username, String password) throws SQLException;
++}
+Index: Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java b/Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java
+new file mode 100644
+--- /dev/null	(date 1760270217233)
++++ b/Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java	(date 1760270217233)
+@@ -0,0 +1,102 @@
++package org.example.dao;
++
++import org.example.model.User;
++import org.example.product.java.util.DBConnection;
++import org.junit.Before;
++import org.junit.Test;
++import org.mockito.MockedStatic;
++import org.mockito.Mockito;
++
++import java.sql.Connection;
++import java.sql.PreparedStatement;
++import java.sql.ResultSet;
++
++import static org.junit.Assert.*;
++import static org.mockito.Mockito.*;
++
++public class UserDAOImplMockitoTest {
++
++    private UserDAOImpl userDAO;
++    private Connection mockConnection;
++    private PreparedStatement mockStatement;
++    private ResultSet mockResultSet;
++
++    @Before
++    public void setUp() throws Exception {
++        userDAO = new UserDAOImpl();
++        mockConnection = mock(Connection.class);
++        mockStatement = mock(PreparedStatement.class);
++        mockResultSet = mock(ResultSet.class);
++    }
++
++    // ✅ Test addUser() method
++    @Test
++    public void testAddUser() throws Exception {
++        User user = new User(1, "ramesh", "secure123", "admin");
++
++        try (MockedStatic<DBConnection> dbMock = Mockito.mockStatic(DBConnection.class)) {
++            dbMock.when(DBConnection::getConnection).thenReturn(mockConnection);
++            when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
++            when(mockStatement.executeUpdate()).thenReturn(1);
++
++            boolean result = userDAO.addUser(user);
++            assertTrue("User should be added successfully", result);
++
++            verify(mockStatement, times(1)).executeUpdate();
++        }
++    }
++
++    // ✅ Test getUserById() method
++    @Test
++    public void testGetUserById() throws Exception {
++        try (MockedStatic<DBConnection> dbMock = Mockito.mockStatic(DBConnection.class)) {
++            dbMock.when(DBConnection::getConnection).thenReturn(mockConnection);
++            when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
++            when(mockStatement.executeQuery()).thenReturn(mockResultSet);
++
++            when(mockResultSet.next()).thenReturn(true);
++            when(mockResultSet.getInt("id")).thenReturn(1);
++            when(mockResultSet.getString("username")).thenReturn("ramesh");
++            when(mockResultSet.getString("password")).thenReturn("secure123");
++            when(mockResultSet.getString("role")).thenReturn("admin");
++
++            User fetched = userDAO.getUserById(1);
++
++            assertNotNull("User should not be null", fetched);
++            assertEquals("ramesh", fetched.getUsername());
++            assertEquals("admin", fetched.getRole());
++        }
++    }
++
++    // ✅ Test updateUser() method
++    @Test
++    public void testUpdateUser() throws Exception {
++        User user = new User(2, "kumar", "updatedPass", "manager");
++
++        try (MockedStatic<DBConnection> dbMock = Mockito.mockStatic(DBConnection.class)) {
++            dbMock.when(DBConnection::getConnection).thenReturn(mockConnection);
++            when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
++            when(mockStatement.executeUpdate()).thenReturn(1);
++
++            boolean result = userDAO.updateUser(user);
++            assertTrue("Update should return true", result);
++
++            verify(mockStatement, times(1)).executeUpdate();
++        }
++    }
++
++    // ✅ Test deleteUser() method
++    @Test
++    public void testDeleteUser() throws Exception {
++        try (MockedStatic<DBConnection> dbMock = Mockito.mockStatic(DBConnection.class)) {
++            dbMock.when(DBConnection::getConnection).thenReturn(mockConnection);
++            when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
++            when(mockStatement.executeUpdate()).thenReturn(1);
++
++            boolean result = userDAO.deleteUser(3);
++            assertTrue("Delete should return true", result);
++
++            verify(mockStatement, times(1)).executeUpdate();
++        }
++    }
++}
+Index: Inventory-Management/src/test/java/org/example/AppTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example;\r\n\r\nimport org.example.dao.ProductDAO;\r\nimport org.example.dao.ProductDAOImpl;\r\nimport org.example.model.Product;\r\nimport org.junit.Assert;\r\nimport org.junit.Before;\r\nimport org.junit.Test;\r\n\r\nimport java.sql.SQLException;\r\nimport java.util.List;\r\n\r\npublic class AppTest {\r\n\r\n    private ProductDAO dao;\r\n\r\n    @Before\r\n    public void setUp() throws SQLException {\r\n        dao = new ProductDAOImpl();\r\n\r\n        // Clean up test IDs before running\r\n        try { dao.deleteProduct(100); } catch (Exception ignored) {}\r\n        try { dao.deleteProduct(101); } catch (Exception ignored) {}\r\n        try { dao.deleteProduct(102); } catch (Exception ignored) {}\r\n    }\r\n\r\n    @Test\r\n    public void testAddAndGetProduct() throws SQLException {\r\n        Product p = new Product(100, \"Test Mouse\", \"Electronics\", 5, 250);\r\n        boolean added = dao.addProduct(p);\r\n\r\n        Assert.assertTrue(\"Product should be added\", added);\r\n\r\n        Product fetched = dao.getProductById(100);\r\n        Assert.assertNotNull(\"Product should be found\", fetched);\r\n        Assert.assertEquals(\"Test Mouse\", fetched.getName());\r\n        Assert.assertEquals(250, fetched.getPrice(), 0.001);\r\n    }\r\n\r\n    @Test\r\n    public void testUpdateProduct() throws SQLException {\r\n        Product p = new Product(101, \"Keyboard\", \"Electronics\", 3, 500);\r\n        dao.addProduct(p);\r\n\r\n        // Modify and update\r\n        p.setPrice(600);\r\n        boolean updated = dao.updateProduct(p);\r\n\r\n        Assert.assertTrue(\"Update should succeed\", updated);\r\n\r\n        Product updatedProduct = dao.getProductById(101);\r\n        Assert.assertEquals(600, updatedProduct.getPrice(), 0.001);\r\n    }\r\n\r\n    @Test\r\n    public void testDeleteProduct() throws SQLException {\r\n        Product p = new Product(102, \"Monitor\", \"Electronics\", 2, 3000);\r\n        dao.addProduct(p);\r\n\r\n        boolean deleted = dao.deleteProduct(102);\r\n        Assert.assertTrue(\"Delete should succeed\", deleted);\r\n\r\n        try {\r\n            dao.getProductById(102);\r\n            Assert.fail(\"Expected SQLException after deleting product\");\r\n        } catch (SQLException ex) {\r\n            Assert.assertTrue(\"Exception message should mention product not found\",\r\n                    ex.getMessage().contains(\"No product found\"));\r\n        }\r\n    }\r\n    @Test\r\n    public void testSearchProductByPriceRange() throws SQLException {\r\n        // Add sample data\r\n        Product p1 = new Product(103, \"Earphones\", \"Electronics\", 10, 150);\r\n        Product p2 = new Product(104, \"Headphones\", \"Electronics\", 8, 800);\r\n        dao.addProduct(p1);\r\n        dao.addProduct(p2);\r\n\r\n        // Search products within price range 100 to 500\r\n        List<Product> products = dao.getProductsByPriceRange(100, 500);\r\n\r\n        Assert.assertNotNull(\"Search result should not be null\", products);\r\n        Assert.assertFalse(\"Search result should not be empty\", products.isEmpty());\r\n\r\n        for (Product p : products) {\r\n            Assert.assertTrue(\r\n                    \"Product price should be within range 100-500\",\r\n                    p.getPrice() >= 100 && p.getPrice() <= 500\r\n            );\r\n        }\r\n    }\r\n\r\n\r\n    @Test\r\n    public void testGetAllProducts() throws SQLException {\r\n        List<Product> products = dao.getAllProducts();\r\n        Assert.assertNotNull(\"Product list should not be null\", products);\r\n        Assert.assertTrue(\"Product list size should be >= 0\", products.size() >= 0);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/test/java/org/example/AppTest.java b/Inventory-Management/src/test/java/org/example/AppTest.java
+--- a/Inventory-Management/src/test/java/org/example/AppTest.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/test/java/org/example/AppTest.java	(date 1759765263714)
+@@ -8,6 +8,7 @@
+ import org.junit.Test;
+ 
+ import java.sql.SQLException;
++import java.util.ArrayList;
+ import java.util.List;
+ 
+ public class AppTest {
+@@ -97,4 +98,25 @@
+         Assert.assertNotNull("Product list should not be null", products);
+         Assert.assertTrue("Product list size should be >= 0", products.size() >= 0);
+     }
++
++    @Test
++    public void testGetPaginatedProducts() {
++        List<Product> all = new ArrayList<>();
++        for (int i = 1; i <= 25; i++) {
++            all.add(new Product(i, "P" + i, "Cat", 1, 10));
++        }
++
++        // Page 2 should contain products 11–20
++        List<Product> page2 = Main.getPaginatedProducts(all, 2, 10);
++
++        Assert.assertEquals(10, page2.size());
++        Assert.assertEquals(11, page2.get(0).getId());
++        Assert.assertEquals(20, page2.get(9).getId());
++
++        // Invalid page should return empty
++        List<Product> invalidPage = Main.getPaginatedProducts(all, 5, 10);
++        Assert.assertTrue(invalidPage.isEmpty());
++    }
++
+ }
++
+Index: Inventory-Management/src/main/java/org/example/service/UserService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/service/UserService.java b/Inventory-Management/src/main/java/org/example/service/UserService.java
+new file mode 100644
+--- /dev/null	(date 1760622040559)
++++ b/Inventory-Management/src/main/java/org/example/service/UserService.java	(date 1760622040559)
+@@ -0,0 +1,61 @@
++package org.example.service;
++
++import org.example.dao.UserDAO;
++import org.example.dao.UserDAOImpl;
++import org.example.model.User;
++
++import java.sql.SQLException;
++import java.util.List;
++
++public class UserService {
++    private final UserDAO userDAO = new UserDAOImpl();
++
++    // ✅ Register new user
++    public void register(String username, String password, String role) {
++        try {
++            User user = new User(username, password, role);
++            boolean success = userDAO.addUser(user);
++
++            if (success)
++                System.out.println("✅ User registered successfully!");
++            else
++                System.out.println("⚠️ Registration failed. Try again.");
++
++        } catch (SQLException e) {
++            System.out.println("💥 Database Error: " + e.getMessage());
++        } catch (IllegalArgumentException e) {
++            System.out.println("⚠️ Validation Error: " + e.getMessage());
++        }
++    }
++
++    // ✅ Login user
++    public User login(String username, String password) {
++        try {
++            User user = userDAO.getUserByUsername(username);
++            if (user != null && user.getPassword().equals(password)) {
++                return user;
++            }
++        } catch (SQLException e) {
++            System.out.println("💥 Database Error: " + e.getMessage());
++        }
++        return null;
++    }
++
++    // ✅ View all users
++    public void viewAllUsers() {
++        try {
++            List<User> users = userDAO.getAllUsers();
++            if (users.isEmpty()) {
++                System.out.println("⚠️ No users found.");
++            } else {
++                System.out.printf("%-5s %-15s %-15s%n", "ID", "Username", "Role");
++                System.out.println("--------------------------------------");
++                for (User user : users) {
++                    System.out.printf("%-5d %-15s %-15s%n", user.getId(), user.getUsername(), user.getRole());
++                }
++            }
++        } catch (SQLException e) {
++            System.out.println("💥 Error fetching users: " + e.getMessage());
++        }
++    }
++}
+Index: Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.product.java.util;\r\n\r\n\r\nimport java.sql.Connection;\r\nimport java.sql.DriverManager;\r\nimport java.sql.SQLException;\r\n\r\npublic class DBConnection {\r\n    private static final String URL = \"jdbc:mysql://localhost:3306/inventoryDB\";\r\n    private static final String USER = \"root\";\r\n    private static final String PASSWORD = \"Sundu@232004\";\r\n\r\n    public static Connection getConnection() throws SQLException {\r\n        return DriverManager.getConnection(URL, USER, PASSWORD);\r\n    }\r\n\r\n//        public void getConnect() {\r\n//            try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {\r\n//                if (conn != null) {\r\n//                    System.out.println(\"Database connected successfully!\");\r\n//                } else {\r\n//                    System.out.println(\"Failed to make connection!\");\r\n//                }\r\n//            } catch (SQLException e) {\r\n//                System.err.println(\"Connection error: \" + e.getMessage());\r\n//            }\r\n//        }\r\n    }\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java b/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java
+--- a/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java	(date 1761052338604)
+@@ -1,29 +1,64 @@
+ package org.example.product.java.util;
+ 
+-
+ import java.sql.Connection;
+ import java.sql.DriverManager;
+ import java.sql.SQLException;
+ 
+ public class DBConnection {
+-    private static final String URL = "jdbc:mysql://localhost:3306/inventoryDB";
+-    private static final String USER = "root";
+-    private static final String PASSWORD = "Sundu@232004";
+ 
++    // ✅ Single reusable connection instance
++    private static Connection connection;
++
++    /**
++     * Returns a valid database connection using environment variables.
++     * Ensures only one connection instance exists throughout the application.
++     */
+     public static Connection getConnection() throws SQLException {
+-        return DriverManager.getConnection(URL, USER, PASSWORD);
+-    }
++        try {
++            if (connection == null || connection.isClosed()) {
++
++                // ✅ Load environment variables
++                String url = System.getenv("DBLink");
++                String user = System.getenv("USERNAME");
++                String pass = System.getenv("PASSWORD");
++
++                // ✅ Validate environment variables
++                if (url == null || user == null || pass == null) {
++                    throw new IllegalStateException(
++                            "❌ Missing DB environment variables. Please set DBLink, USERNAME, and PASSWORD."
++                    );
++                }
++
++                // ✅ Load MySQL driver explicitly (optional for newer JDBC versions)
++                try {
++                    Class.forName("com.mysql.cj.jdbc.Driver");
++                } catch (ClassNotFoundException e) {
++                    System.err.println("⚠️ MySQL JDBC Driver not found. Add it to your classpath.");
++                }
+ 
+-//        public void getConnect() {
+-//            try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+-//                if (conn != null) {
+-//                    System.out.println("Database connected successfully!");
+-//                } else {
+-//                    System.out.println("Failed to make connection!");
+-//                }
+-//            } catch (SQLException e) {
+-//                System.err.println("Connection error: " + e.getMessage());
+-//            }
+-//        }
+-    }
++                // ✅ Establish database connection
++               connection = DriverManager.getConnection(url, user, pass);
++//                System.out.println("✅ Database connected successfully!");
++            }
++        } catch (SQLException e) {
++            System.err.println("💥 Database connection failed: " + e.getMessage());
++            throw e;
++        }
+ 
++        return connection;
++    }
++
++    /**
++     * Safely closes the database connection.
++     */
++    public static void closeConnection() {
++        try {
++            if (connection != null && !connection.isClosed()) {
++                connection.close();
++                System.out.println("🔌 Database connection closed.");
++            }
++        } catch (SQLException e) {
++            System.err.println("⚠️ Error closing connection: " + e.getMessage());
++        }
++    }
++}
+Index: Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example.dao;\r\n\r\nimport org.example.model.Product;\r\nimport org.example.product.java.util.DBConnection;\r\n\r\nimport java.sql.*;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\npublic class ProductDAOImpl implements ProductDAO {\r\n\r\n    @Override\r\n    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException {\r\n        List<Product> products = new ArrayList<>();\r\n\r\n        String query = \"SELECT * FROM products WHERE price BETWEEN ? AND ?\";\r\n        try (Connection con = DBConnection.getConnection();\r\n             PreparedStatement ps = con.prepareStatement(query)) {\r\n\r\n            ps.setDouble(1, minPrice);\r\n            ps.setDouble(2, maxPrice);\r\n\r\n            ResultSet rs = ps.executeQuery();\r\n            while (rs.next()) {\r\n                Product p = new Product(\r\n                        rs.getInt(\"id\"),\r\n                        rs.getString(\"name\"),\r\n                        rs.getString(\"category\"),\r\n                        rs.getInt(\"quantity\"),\r\n                        rs.getDouble(\"price\")\r\n                );\r\n                products.add(p);\r\n            }\r\n        }\r\n        return products;\r\n    }\r\n\r\n    @Override\r\n    public boolean addProduct(Product product) throws SQLException {\r\n        String query = \"INSERT INTO products VALUES (?, ?, ?, ?, ?)\";\r\n        try (Connection conn = DBConnection.getConnection();\r\n             PreparedStatement st = conn.prepareStatement(query)) {\r\n\r\n            st.setInt(1, product.getId());\r\n            st.setString(2, product.getName());\r\n            st.setString(3, product.getCategory());\r\n            st.setInt(4, product.getQuantity());\r\n            st.setDouble(5, product.getPrice());\r\n\r\n            return st.executeUpdate() > 0;\r\n\r\n        } catch (SQLException e) {\r\n            if (e.getErrorCode() == 1062) { // Duplicate key\r\n                throw new SQLException(\"❌ Product with ID \" + product.getId() + \" already exists. Please use a unique ID.\");\r\n            } else if (e.getErrorCode() == 1048) { // Null value in NOT NULL column\r\n                throw new SQLException(\"⚠\uFE0F One of the required fields (ID, Name, Category, Quantity, Price) is missing.\");\r\n            } else {\r\n                throw new SQLException(\"\uD83D\uDCA5 Failed to add product. Reason: \" + e.getMessage());\r\n            }\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public List<Product> getAllProducts() throws SQLException {\r\n        List<Product> products = new ArrayList<>();\r\n        String query = \"SELECT * FROM products\";\r\n        try (Connection conn = DBConnection.getConnection();\r\n             Statement st = conn.createStatement();\r\n             ResultSet rs = st.executeQuery(query)) {\r\n\r\n            while (rs.next()) {\r\n                products.add(new Product(\r\n                        rs.getInt(\"id\"),\r\n                        rs.getString(\"name\"),\r\n                        rs.getString(\"category\"),\r\n                        rs.getInt(\"quantity\"),\r\n                        rs.getDouble(\"price\")\r\n                ));\r\n            }\r\n        } catch (SQLException e) {\r\n            throw new SQLException(\"\uD83D\uDCA5 Could not fetch product list. Please try again. (\" + e.getMessage() + \")\");\r\n        }\r\n        return products;\r\n    }\r\n\r\n    @Override\r\n    public Product getProductById(int id) throws SQLException {\r\n        String query = \"SELECT * FROM products WHERE id = ?\";\r\n        try (Connection conn = DBConnection.getConnection();\r\n             PreparedStatement st = conn.prepareStatement(query)) {\r\n\r\n            st.setInt(1, id);\r\n            try (ResultSet rs = st.executeQuery()) {\r\n                if (rs.next()) {\r\n                    return new Product(\r\n                            rs.getInt(\"id\"),\r\n                            rs.getString(\"name\"),\r\n                            rs.getString(\"category\"),\r\n                            rs.getInt(\"quantity\"),\r\n                            rs.getDouble(\"price\")\r\n                    );\r\n                } else {\r\n                    throw new SQLException(\"\uD83D\uDD0D No product found with ID \" + id);\r\n                }\r\n            }\r\n\r\n        } catch (SQLException e) {\r\n            throw new SQLException(\"\uD83D\uDCA5 Failed to search for product ID \" + id + \". Reason: \" + e.getMessage());\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public boolean updateProduct(Product product) throws SQLException {\r\n        String sql = \"UPDATE products SET name = ?, category = ?, quantity = ?, price = ? WHERE id = ?\";\r\n        try (Connection conn = DBConnection.getConnection();\r\n             PreparedStatement st = conn.prepareStatement(sql)) {\r\n\r\n            st.setString(1, product.getName());\r\n            st.setString(2, product.getCategory());\r\n            st.setInt(3, product.getQuantity());\r\n            st.setDouble(4, product.getPrice());\r\n            st.setInt(5, product.getId());\r\n\r\n            int rows = st.executeUpdate();\r\n            if (rows == 0) {\r\n                throw new SQLException(\"⚠\uFE0F Update failed. No product found with ID \" + product.getId());\r\n            }\r\n            return true;\r\n\r\n        } catch (SQLException e) {\r\n            throw new SQLException(\"\uD83D\uDCA5 Could not update product ID \" + product.getId() + \". Reason: \" + e.getMessage());\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public boolean deleteProduct(int id) throws SQLException {\r\n        String query = \"DELETE FROM products WHERE id = ?\";\r\n        try (Connection conn = DBConnection.getConnection();\r\n             PreparedStatement st = conn.prepareStatement(query)) {\r\n\r\n            st.setInt(1, id);\r\n            int rows = st.executeUpdate();\r\n            if (rows == 0) {\r\n                throw new SQLException(\"⚠\uFE0F Cannot delete. No product found with ID \" + id);\r\n            }\r\n            return true;\r\n\r\n        } catch (SQLException e) {\r\n            throw new SQLException(\"\uD83D\uDCA5 Could not delete product ID \" + id + \". Reason: \" + e.getMessage());\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java b/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java
+--- a/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java	(revision e031d7bf9fd40d7671aa7e8deba519101773c322)
++++ b/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java	(date 1761051624036)
+@@ -6,147 +6,224 @@
+ import java.sql.*;
+ import java.util.ArrayList;
+ import java.util.List;
++import java.util.Scanner;
+ 
+ public class ProductDAOImpl implements ProductDAO {
+ 
+-    @Override
+-    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException {
+-        List<Product> products = new ArrayList<>();
+-
+-        String query = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
+-        try (Connection con = DBConnection.getConnection();
+-             PreparedStatement ps = con.prepareStatement(query)) {
++    private final Scanner sc = new Scanner(System.in);
+ 
+-            ps.setDouble(1, minPrice);
+-            ps.setDouble(2, maxPrice);
+-
+-            ResultSet rs = ps.executeQuery();
+-            while (rs.next()) {
+-                Product p = new Product(
+-                        rs.getInt("id"),
+-                        rs.getString("name"),
+-                        rs.getString("category"),
+-                        rs.getInt("quantity"),
+-                        rs.getDouble("price")
+-                );
+-                products.add(p);
+-            }
+-        }
+-        return products;
+-    }
++    // === CORE DAO METHODS ===
+ 
+     @Override
+-    public boolean addProduct(Product product) throws SQLException {
+-        String query = "INSERT INTO products VALUES (?, ?, ?, ?, ?)";
++    public boolean addProduct(Product p) throws SQLException {
++        String sql = "INSERT INTO products (id, name, category, quantity, price) VALUES (?, ?, ?, ?, ?)";
+         try (Connection conn = DBConnection.getConnection();
+-             PreparedStatement st = conn.prepareStatement(query)) {
+-
+-            st.setInt(1, product.getId());
+-            st.setString(2, product.getName());
+-            st.setString(3, product.getCategory());
+-            st.setInt(4, product.getQuantity());
+-            st.setDouble(5, product.getPrice());
+-
+-            return st.executeUpdate() > 0;
+-
+-        } catch (SQLException e) {
+-            if (e.getErrorCode() == 1062) { // Duplicate key
+-                throw new SQLException("❌ Product with ID " + product.getId() + " already exists. Please use a unique ID.");
+-            } else if (e.getErrorCode() == 1048) { // Null value in NOT NULL column
+-                throw new SQLException("⚠️ One of the required fields (ID, Name, Category, Quantity, Price) is missing.");
+-            } else {
+-                throw new SQLException("💥 Failed to add product. Reason: " + e.getMessage());
+-            }
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setInt(1, p.getId());
++            ps.setString(2, p.getName());
++            ps.setString(3, p.getCategory());
++            ps.setInt(4, p.getQuantity());
++            ps.setDouble(5, p.getPrice());
++            return ps.executeUpdate() > 0;
+         }
+     }
+ 
+     @Override
+     public List<Product> getAllProducts() throws SQLException {
+-        List<Product> products = new ArrayList<>();
+-        String query = "SELECT * FROM products";
++        List<Product> list = new ArrayList<>();
++        String sql = "SELECT * FROM products";
+         try (Connection conn = DBConnection.getConnection();
+-             Statement st = conn.createStatement();
+-             ResultSet rs = st.executeQuery(query)) {
+-
++             Statement stmt = conn.createStatement();
++             ResultSet rs = stmt.executeQuery(sql)) {
+             while (rs.next()) {
+-                products.add(new Product(
+-                        rs.getInt("id"),
+-                        rs.getString("name"),
+-                        rs.getString("category"),
+-                        rs.getInt("quantity"),
+-                        rs.getDouble("price")
+-                ));
++                list.add(mapRowToProduct(rs));
+             }
+-        } catch (SQLException e) {
+-            throw new SQLException("💥 Could not fetch product list. Please try again. (" + e.getMessage() + ")");
+         }
+-        return products;
++        return list;
+     }
+ 
+     @Override
+     public Product getProductById(int id) throws SQLException {
+-        String query = "SELECT * FROM products WHERE id = ?";
++        String sql = "SELECT * FROM products WHERE id = ?";
+         try (Connection conn = DBConnection.getConnection();
+-             PreparedStatement st = conn.prepareStatement(query)) {
+-
+-            st.setInt(1, id);
+-            try (ResultSet rs = st.executeQuery()) {
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setInt(1, id);
++            try (ResultSet rs = ps.executeQuery()) {
+                 if (rs.next()) {
+-                    return new Product(
+-                            rs.getInt("id"),
+-                            rs.getString("name"),
+-                            rs.getString("category"),
+-                            rs.getInt("quantity"),
+-                            rs.getDouble("price")
+-                    );
+-                } else {
+-                    throw new SQLException("🔍 No product found with ID " + id);
+-                }
+-            }
+-
+-        } catch (SQLException e) {
+-            throw new SQLException("💥 Failed to search for product ID " + id + ". Reason: " + e.getMessage());
+-        }
++                    return mapRowToProduct(rs);
++                }
++            }
++        }
++        return null;
++    }
++
++    @Override
++    public boolean updateProduct(Product p) throws SQLException {
++        String sql = "UPDATE products SET name=?, category=?, quantity=?, price=? WHERE id=?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setString(1, p.getName());
++            ps.setString(2, p.getCategory());
++            ps.setInt(3, p.getQuantity());
++            ps.setDouble(4, p.getPrice());
++            ps.setInt(5, p.getId());
++            return ps.executeUpdate() > 0;
++        }
++    }
++
++    @Override
++    public boolean deleteProduct(int id) throws SQLException {
++        String sql = "DELETE FROM products WHERE id=?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setInt(1, id);
++            return ps.executeUpdate() > 0;
++        }
++    }
++
++    @Override
++    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) throws SQLException {
++        List<Product> list = new ArrayList<>();
++        String sql = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
++        try (Connection conn = DBConnection.getConnection();
++             PreparedStatement ps = conn.prepareStatement(sql)) {
++            ps.setDouble(1, minPrice);
++            ps.setDouble(2, maxPrice);
++            try (ResultSet rs = ps.executeQuery()) {
++                while (rs.next()) {
++                    list.add(mapRowToProduct(rs));
++                }
++            }
++        }
++        return list;
++    }
++
++    // === INTERACTIVE METHODS CALLED BY APP ===
++
++    public void addProductFromInput() throws SQLException {
++        System.out.print("🆔 Product ID: ");
++        int id = sc.nextInt();
++        sc.nextLine();
++
++        // Check if ID already exists
++        if (getProductById(id) != null) {
++            System.out.println("⚠️ Product with ID " + id + " already exists. Choose another ID.");
++            return;
++        }
++
++        System.out.print("📝 Product Name: ");
++        String name = sc.nextLine();
++
++        System.out.print("📂 Category: ");
++        String category = sc.nextLine();
++
++        System.out.print("🔢 Quantity: ");
++        int qty = sc.nextInt();
++
++        System.out.print("💰 Price: ");
++        double price = sc.nextDouble();
++        sc.nextLine();
++
++        Product p = new Product(id, name, category, qty, price);
++        if (addProduct(p)) {
++            System.out.println("✅ Product added successfully!");
++        } else {
++            System.out.println("❌ Failed to add product.");
++        }
++    }
++
++    public void searchProductById() throws SQLException {
++        System.out.print("🔍 Enter Product ID: ");
++        int id = sc.nextInt();
++        sc.nextLine();
++        Product p = getProductById(id);
++        if (p != null) {
++            printHeader();
++            printProduct(p);
++        } else {
++            System.out.println("⚠️ Product not found.");
++        }
++    }
++
++    public void updateProductById() throws SQLException {
++        System.out.print("🔄 Enter Product ID to update: ");
++        int id = sc.nextInt();
++        sc.nextLine();
++        Product p = getProductById(id);
++        if (p == null) {
++            System.out.println("⚠️ Product not found.");
++            return;
++        }
++
++        System.out.print("📝 New Name (" + p.getName() + "): ");
++        String name = sc.nextLine();
++        System.out.print("📂 New Category (" + p.getCategory() + "): ");
++        String category = sc.nextLine();
++        System.out.print("🔢 New Quantity (" + p.getQuantity() + "): ");
++        int qty = sc.nextInt();
++        System.out.print("💰 New Price (" + p.getPrice() + "): ");
++        double price = sc.nextDouble();
++        sc.nextLine();
++
++        p.setName(name.isEmpty() ? p.getName() : name);
++        p.setCategory(category.isEmpty() ? p.getCategory() : category);
++        p.setQuantity(qty);
++        p.setPrice(price);
++
++        if (updateProduct(p)) {
++            System.out.println("✅ Product updated successfully!");
++        } else {
++            System.out.println("❌ Failed to update product.");
++        }
++    }
++
++    public void deleteProductById() throws SQLException {
++        System.out.print("🗑 Enter Product ID to delete: ");
++        int id = sc.nextInt();
++        sc.nextLine();
++        if (deleteProduct(id)) {
++            System.out.println("✅ Product deleted successfully!");
++        } else {
++            System.out.println("❌ Product not found or deletion failed.");
++        }
++    }
++
++    public void filterByPriceRange() throws SQLException {
++        System.out.print("💲 Enter minimum price: ");
++        double min = sc.nextDouble();
++        System.out.print("💲 Enter maximum price: ");
++        double max = sc.nextDouble();
++        sc.nextLine();
++
++        List<Product> filtered = getProductsByPriceRange(min, max);
++        if (filtered.isEmpty()) {
++            System.out.println("⚠️ No products found in this price range.");
++            return;
++        }
++
++        printHeader();
++        filtered.forEach(this::printProduct);
++    }
++
++    // === HELPER METHODS ===
++
++    private Product mapRowToProduct(ResultSet rs) throws SQLException {
++        return new Product(
++                rs.getInt("id"),
++                rs.getString("name"),
++                rs.getString("category"),
++                rs.getInt("quantity"),
++                rs.getDouble("price")
++        );
+     }
+-
+-    @Override
+-    public boolean updateProduct(Product product) throws SQLException {
+-        String sql = "UPDATE products SET name = ?, category = ?, quantity = ?, price = ? WHERE id = ?";
+-        try (Connection conn = DBConnection.getConnection();
+-             PreparedStatement st = conn.prepareStatement(sql)) {
+-
+-            st.setString(1, product.getName());
+-            st.setString(2, product.getCategory());
+-            st.setInt(3, product.getQuantity());
+-            st.setDouble(4, product.getPrice());
+-            st.setInt(5, product.getId());
+-
+-            int rows = st.executeUpdate();
+-            if (rows == 0) {
+-                throw new SQLException("⚠️ Update failed. No product found with ID " + product.getId());
+-            }
+-            return true;
+ 
+-        } catch (SQLException e) {
+-            throw new SQLException("💥 Could not update product ID " + product.getId() + ". Reason: " + e.getMessage());
+-        }
++    private void printHeader() {
++        System.out.printf("%-5s %-15s %-15s %-10s %-10s%n", "ID", "Name", "Category", "Quantity", "Price");
++        System.out.println("-----------------------------------------------------------");
+     }
+ 
+-    @Override
+-    public boolean deleteProduct(int id) throws SQLException {
+-        String query = "DELETE FROM products WHERE id = ?";
+-        try (Connection conn = DBConnection.getConnection();
+-             PreparedStatement st = conn.prepareStatement(query)) {
+-
+-            st.setInt(1, id);
+-            int rows = st.executeUpdate();
+-            if (rows == 0) {
+-                throw new SQLException("⚠️ Cannot delete. No product found with ID " + id);
+-            }
+-            return true;
+-
+-        } catch (SQLException e) {
+-            throw new SQLException("💥 Could not delete product ID " + id + ". Reason: " + e.getMessage());
+-        }
++    private void printProduct(Product p) {
++        System.out.printf("%-5d %-15s %-15s %-10d %-10.2f%n",
++                p.getId(), p.getName(), p.getCategory(), p.getQuantity(), p.getPrice());
+     }
+-}
++}
+\ No newline at end of file
+Index: Inventory-Management/src/main/java/org/example/service/StockAlertService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/service/StockAlertService.java b/Inventory-Management/src/main/java/org/example/service/StockAlertService.java
+new file mode 100644
+--- /dev/null	(date 1761144150452)
++++ b/Inventory-Management/src/main/java/org/example/service/StockAlertService.java	(date 1761144150452)
+@@ -0,0 +1,88 @@
++package org.example.service;
++
++import org.example.dao.ProductDAOImpl;
++import org.example.model.Product;
++
++import jakarta.mail.*;
++import jakarta.mail.internet.*;
++
++import java.sql.SQLException;
++import java.util.List;
++import java.util.Properties;
++
++public class StockAlertService {
++
++    private static final String FROM_EMAIL = System.getenv("MAIL_USER");
++    private static final String APP_PASSWORD = System.getenv("MAIL_PASS");
++
++    private static final ProductDAOImpl productDAO = new ProductDAOImpl();
++
++    // === Main alert method ===
++    public static void sendLowStockAlerts(String recipientEmail) {
++        if (isNullOrEmpty(FROM_EMAIL) || isNullOrEmpty(APP_PASSWORD)) {
++            System.err.println("⚠️ Email credentials not set. Set MAIL_USER and MAIL_PASS in environment variables.");
++            return;
++        }
++
++        try {
++            List<Product> products = productDAO.getAllProducts();
++            StringBuilder alertBody = new StringBuilder();
++            int lowCount = 0;
++
++            for (Product p : products) {
++                if (p.getQuantity() < p.getThreshold()) {
++                    lowCount++;
++                    alertBody.append("🔻 LOW STOCK ALERT\n")
++                            .append("Product: ").append(p.getName()).append("\n")
++                            .append("Category: ").append(p.getCategory()).append("\n")
++                            .append("Quantity: ").append(p.getQuantity()).append("\n")
++                            .append("Threshold: ").append(p.getThreshold()).append("\n")
++                            .append("Price: ₹").append(p.getPrice()).append("\n\n");
++                }
++            }
++
++            if (lowCount == 0) {
++                System.out.println("✅ All products are sufficiently stocked.");
++                return;
++            }
++
++            String subject = "📦 Inventory Low Stock Alert (" + lowCount + " Items)";
++            sendEmail(recipientEmail, subject, alertBody.toString());
++            System.out.println("✅ Stock alert email sent successfully to " + recipientEmail);
++
++        } catch (SQLException e) {
++            System.err.println("❌ Database error while fetching products: " + e.getMessage());
++        } catch (MessagingException e) {
++            System.err.println("❌ Email sending failed: " + e.getMessage());
++        }
++    }
++
++    // === Email sending logic ===
++    private static void sendEmail(String toEmail, String subject, String body) throws MessagingException {
++        Properties props = new Properties();
++        props.put("mail.smtp.auth", "true");
++        props.put("mail.smtp.starttls.enable", "true");
++        props.put("mail.smtp.host", "smtp.gmail.com");
++        props.put("mail.smtp.port", "587");
++
++        // Create authenticated session
++        Session session = Session.getInstance(props, new Authenticator() {
++            protected PasswordAuthentication getPasswordAuthentication() {
++                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
++            }
++        });
++
++        Message message = new MimeMessage(session);
++        message.setFrom(new InternetAddress(FROM_EMAIL, false));
++        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
++        message.setSubject(subject);
++        message.setText(body);
++
++        Transport.send(message);
++    }
++
++    // === Utility ===
++    private static boolean isNullOrEmpty(String s) {
++        return s == null || s.trim().isEmpty();
++    }
++}
+Index: Inventory-Management/src/main/java/org/example/service/EmailService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Inventory-Management/src/main/java/org/example/service/EmailService.java b/Inventory-Management/src/main/java/org/example/service/EmailService.java
+new file mode 100644
+--- /dev/null	(date 1761049455610)
++++ b/Inventory-Management/src/main/java/org/example/service/EmailService.java	(date 1761049455610)
+@@ -0,0 +1,121 @@
++package org.example.service;
++
++import jakarta.mail.*;
++import jakarta.mail.internet.*;
++import org.example.dao.ProductDAOImpl;
++import org.example.model.Product;
++import org.example.util.CSVHelper;
++
++import java.io.File;
++import java.sql.SQLException;
++import java.util.List;
++import java.util.Properties;
++
++public class EmailService {
++
++    private static final String FROM_EMAIL = System.getenv("MAIL_USER");
++    private static final String APP_PASSWORD = System.getenv("MAIL_PASS");
++    private static final String CSV_PATH = "product_report.csv";
++
++    static {
++        validateCredentials();
++    }
++
++    private static void validateCredentials() {
++        if (isNullOrEmpty(FROM_EMAIL) || isNullOrEmpty(APP_PASSWORD)) {
++            throw new IllegalStateException("❌ MAIL_USER or MAIL_PASS environment variable is not set!");
++        }
++    }
++
++    private static boolean isNullOrEmpty(String value) {
++        return value == null || value.trim().isEmpty();
++    }
++
++    // ✅ Sends the actual report from the database
++    public static void sendProductReport(String toEmail, String subject, String body) {
++        try {
++            // 1️⃣ Fetch products from DB
++            ProductDAOImpl productDAO = new ProductDAOImpl();
++            List<Product> products = productDAO.getAllProducts();
++
++            if (products.isEmpty()) {
++                System.err.println("⚠️ No products found in the database!");
++                return;
++            }
++
++            // 2️⃣ Save products to CSV
++            CSVHelper.saveProducts(products, CSV_PATH);
++//            System.out.println("📄 Product report saved to: " + CSV_PATH);
++
++            // 3️⃣ Prepare and send the email
++            Session session = createEmailSession();
++            Message message = composeMessage(session, toEmail, subject, body, CSV_PATH);
++
++            Transport.send(message);
++//            System.out.println("✅ Product report sent successfully to " + toEmail);
++
++        } catch (SQLException e) {
++            System.err.println("❌ Database error: " + e.getMessage());
++        } catch (Exception e) {
++            System.err.println("❌ Email sending failed: " + e.getMessage());
++            e.printStackTrace();
++        }
++    }
++
++    private static Session createEmailSession() {
++        Properties props = new Properties();
++        props.put("mail.smtp.host", "smtp.gmail.com");
++        props.put("mail.smtp.port", "587");
++        props.put("mail.smtp.auth", "true");
++        props.put("mail.smtp.starttls.enable", "true");
++
++        return Session.getInstance(props, new Authenticator() {
++            @Override
++            protected PasswordAuthentication getPasswordAuthentication() {
++                return new PasswordAuthentication(FROM_EMAIL, APP_PASSWORD);
++            }
++        });
++    }
++
++    private static Message composeMessage(Session session, String toEmail, String subject, String body, String attachmentPath)
++            throws MessagingException {
++        Message message = new MimeMessage(session);
++        message.setFrom(new InternetAddress(FROM_EMAIL));
++        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
++        message.setSubject(subject);
++
++        Multipart multipart = new MimeMultipart();
++
++        // Email body
++        MimeBodyPart textPart = new MimeBodyPart();
++        textPart.setText(body);
++        multipart.addBodyPart(textPart);
++
++        // Attachment
++        File file = new File(attachmentPath);
++        if (file.exists()) {
++            MimeBodyPart attachmentPart = new MimeBodyPart();
++            try {
++                attachmentPart.attachFile(file);
++                attachmentPart.setFileName(file.getName());
++                multipart.addBodyPart(attachmentPart);
++            } catch (Exception e) {
++                System.err.println("⚠️ Failed to attach CSV: " + e.getMessage());
++            }
++        } else {
++            System.err.println("⚠️ CSV file not found: " + attachmentPath);
++        }
++
++        message.setContent(multipart);
++        return message;
++    }
++
++    // ✅ For standalone testing
++    public static void main(String[] args) {
++        sendProductReport(
++                FROM_EMAIL,  // you can change to recipient email
++                "📦 Inventory Product Report",
++                "Attached is the latest inventory report from the database."
++        );
++    }
++}
+diff --git a/Inventory-Management/src/test/java/org/example/model/UserValidationTest.java b/Inventory-Management/src/test/java/org/example/model/UserValidationTest.java
+new file mode 100644
