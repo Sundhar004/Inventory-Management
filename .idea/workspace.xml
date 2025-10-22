@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1d80ccdb-1fe8-493e-91b7-29fbaffca517" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Inventory-Management" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/UserDAO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/model/User.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/service/EmailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/service/StockAlertService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/service/UserService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/model/UserValidationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/model/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/model/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/product/java/util/DBConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/products.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/util/CSVHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/util/CSVHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/AppTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/AppTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Exception" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/Inventory-Management" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Sundhar004&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Sundhar004/Inventory-Management.git&quot;,
+    &quot;accountId&quot;: &quot;17938138-fa8c-45ed-bbce-1e3258d0c2ac&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/Main.java" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/pom.xml" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="32UqYN5i3Aop5UIS9mTdGnYgDSo" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.App.executor&quot;: &quot;Run&quot;,
+    &quot;Application.EmailService.executor&quot;: &quot;Run&quot;,
+    &quot;Application.InventoryManagement.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.org.example.product.java.src.App.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AppTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AppTest.testAddAndGetProduct.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ProductDAOImplMockitoTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ProductsValidationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserDAOImplMockitoTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testInvalidUsername.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testToStringOutput.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testValidRoles.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.preview.features.used&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;S:/Inventory&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="S:\Inventory\src\main\java\org\example" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="S:\Inventory\reports" />
+      <recent name="S:\Inventory\Inventory-Management" />
+      <recent name="S:\Inventory\src\main\java\org\example" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="org.example" />
+      <recent name="org.example.model" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.App">
+    <configuration name="App" type="Application" factoryName="Application" temporary="true">
+      <envs>
+        <env name="MAIL_USER" value="sundhararameshwar.senthil@gmail.com" />
+        <env name="MAIL_PASS" value="smlg pdnn fpdg vzug" />
+        <env name="DbLink" value="jdbc:mysql://localhost:3306/inventoryDB" />
+        <env name="USERNAME" value="root" />
+        <env name="PASSWORD" value="Sundu@232004" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="org.example.App" />
+      <module name="Inventory" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EmailService" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <envs>
+        <env name="MAIL_USER" value="sundhararameshwar.senthil@gmail.com" />
+        <env name="MAIL_PASS" value="smlg pdnn fpdg vzug" />
+        <env name="DbLink" value="jdbc:mysql://localhost:3306/inventoryDB" />
+        <env name="USERNAME" value="root" />
+        <env name="PASSWORD" value="Sundu@232004" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="org.example.service.EmailService" />
+      <module name="Inventory" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UserValidationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Inventory" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.model.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.model" />
+      <option name="MAIN_CLASS_NAME" value="org.example.model.UserValidationTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UserValidationTest.testInvalidUsername" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Inventory" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.model.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.model" />
+      <option name="MAIN_CLASS_NAME" value="org.example.model.UserValidationTest" />
+      <option name="METHOD_NAME" value="testInvalidUsername" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UserValidationTest.testValidRoles" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Inventory" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.model.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example.model" />
+      <option name="MAIN_CLASS_NAME" value="org.example.model.UserValidationTest" />
+      <option name="METHOD_NAME" value="testValidRoles" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.App" />
+      <item itemvalue="Application.EmailService" />
+      <item itemvalue="JUnit.UserValidationTest" />
+      <item itemvalue="JUnit.UserValidationTest.testInvalidUsername" />
+      <item itemvalue="JUnit.UserValidationTest.testValidRoles" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.App" />
+        <item itemvalue="Application.EmailService" />
+        <item itemvalue="JUnit.UserValidationTest.testInvalidUsername" />
+        <item itemvalue="JUnit.UserValidationTest" />
+        <item itemvalue="JUnit.UserValidationTest.testValidRoles" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1d80ccdb-1fe8-493e-91b7-29fbaffca517" name="Changes" comment="" />
+      <created>1757485544440</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757485544440</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="main" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="HIGHLIGHTERS">
+                <map>
+                  <entry key="MY_COMMITS" value="true" />
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
