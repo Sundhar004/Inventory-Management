@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d80ccdb-1fe8-493e-91b7-29fbaffca517" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/UserDAO.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/UserDAOImpl.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/model/User.java" afterDir="false" />
