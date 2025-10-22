@@ -14,6 +14,7 @@
       <change afterPath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/dao/UserDAOImplMockitoTest.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Inventory-Management/src/test/java/org/example/model/UserValidationTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inventory-Management" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/App.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/Inventory-Management/src/main/java/org/example/dao/ProductDAOImpl.java" afterDir="false" />
@@ -73,38 +74,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.App.executor": "Run",
-    "Application.App.java.executor": "Run",
-    "Application.EmailService.executor": "Run",
-    "Application.InventoryManagement.executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.org.example.product.java.src.App.executor": "Run",
-    "JUnit.AppTest.executor": "Run",
-    "JUnit.AppTest.testAddAndGetProduct.executor": "Run",
-    "JUnit.ProductDAOImplMockitoTest.executor": "Run",
-    "JUnit.ProductsValidationTest.executor": "Run",
-    "JUnit.UserDAOImplMockitoTest.executor": "Run",
-    "JUnit.UserValidationTest.executor": "Run",
-    "JUnit.UserValidationTest.testInvalidUsername.executor": "Run",
-    "JUnit.UserValidationTest.testToStringOutput.executor": "Run",
-    "JUnit.UserValidationTest.testValidRoles.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "ignore.preview.features.used": "true",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "S:/Inventory",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.App.executor&quot;: &quot;Run&quot;,
+    &quot;Application.App.java.executor&quot;: &quot;Run&quot;,
+    &quot;Application.EmailService.executor&quot;: &quot;Run&quot;,
+    &quot;Application.InventoryManagement.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.org.example.product.java.src.App.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AppTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AppTest.testAddAndGetProduct.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ProductDAOImplMockitoTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ProductsValidationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserDAOImplMockitoTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testInvalidUsername.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testToStringOutput.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserValidationTest.testValidRoles.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.preview.features.used&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;S:/Inventory&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="S:\Inventory\src\main\java\org\example" />
@@ -268,7 +269,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="main" />
+                        <option value="master" />
                       </list>
                     </value>
                   </entry>
