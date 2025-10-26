@@ -1,0 +1,10 @@
+ID,Name,Category,Quantity,Price
+1,Laptop,Electronics,19,65000.00
+2,Phone,Electronics,10,35000.00
+3,Table,Furniture,5,4500.00
+4,Chair,Furniture,12,1500.00
+5,Headphones,Electronics,8,2000.00
+7,Pen,Stationery,100,10.00
+8,Notebook,Stationery,60,50.00
+9,Mouse,Electronics,25,500.00
+10,Keyboard,Electronics,22,1200.00
