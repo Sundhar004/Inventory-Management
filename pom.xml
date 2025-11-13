@@ -84,6 +84,13 @@
             <version>3.21.9</version>
         </dependency>
 
+       <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>20.0.2</version>
+       </dependency>
+
+
     </dependencies>
 
     <build>
@@ -106,6 +113,16 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
             </plugin>
+
+            <plugin>
+              <groupId>org.openjfx</groupId>
+              <artifactId>javafx-maven-plugin</artifactId>
+              <version>0.0.8</version>
+              <configuration>
+                <mainClass>org.example.InventoryApp</mainClass>
+              </configuration>
+           </plugin>
+
 
             <!-- ✅ Shade Plugin (optional - create executable JAR) -->
             <plugin>
