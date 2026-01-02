@@ -17,10 +17,6 @@ public class EmailService {
     private static final String APP_PASSWORD = System.getenv("MAIL_PASS");
     private static final String CSV_PATH = "product_report.csv";
 
-    static {
-        validateCredentials();
-    }
-
     private static void validateCredentials() {
         if (isNullOrEmpty(FROM_EMAIL) || isNullOrEmpty(APP_PASSWORD)) {
             throw new IllegalStateException("❌ MAIL_USER or MAIL_PASS environment variable is not set!");
@@ -33,6 +29,7 @@ public class EmailService {
 
     // ✅ Sends the actual report from the database
     public static void sendProductReport(String toEmail, String subject, String body) {
+        validateCredentials();
         try {
             // 1️⃣ Fetch products from DB
             ProductDAOImpl productDAO = new ProductDAOImpl();
@@ -45,14 +42,14 @@ public class EmailService {
 
             // 2️⃣ Save products to CSV
             CSVHelper.saveProducts(products, CSV_PATH);
-//            System.out.println("📄 Product report saved to: " + CSV_PATH);
+            // System.out.println("📄 Product report saved to: " + CSV_PATH);
 
             // 3️⃣ Prepare and send the email
             Session session = createEmailSession();
             Message message = composeMessage(session, toEmail, subject, body, CSV_PATH);
 
             Transport.send(message);
-//            System.out.println("✅ Product report sent successfully to " + toEmail);
+            // System.out.println("✅ Product report sent successfully to " + toEmail);
 
         } catch (SQLException e) {
             System.err.println("❌ Database error: " + e.getMessage());
@@ -78,7 +75,8 @@ public class EmailService {
     }
 
     public static void sendEmail(String toEmail, String subject, String body) throws MessagingException {
-        // Validate credentials (existing static initializer will throw if missing)
+        // Validate credentials
+        validateCredentials();
         Session session = createEmailSession();
 
         Message message = new MimeMessage(session);
@@ -97,8 +95,8 @@ public class EmailService {
         Transport.send(message);
     }
 
-
-    private static Message composeMessage(Session session, String toEmail, String subject, String body, String attachmentPath)
+    private static Message composeMessage(Session session, String toEmail, String subject, String body,
+            String attachmentPath)
             throws MessagingException {
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(FROM_EMAIL));
@@ -134,9 +132,8 @@ public class EmailService {
     // ✅ For standalone testing
     public static void main(String[] args) {
         sendProductReport(
-                FROM_EMAIL,  // you can change to recipient email
+                FROM_EMAIL, // you can change to recipient email
                 "📦 Inventory Product Report",
-                "Attached is the latest inventory report from the database."
-        );
+                "Attached is the latest inventory report from the database.");
     }
 }

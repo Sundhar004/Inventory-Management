@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.controller.LoginController"
+            prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/styles.css">
+    <children>
+        <VBox spacing="20.0" alignment="CENTER" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" 
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            
+            <Label text="Welcome Back" styleClass="header-label"/>
+            
+            <VBox spacing="10.0" maxWidth="300.0">
+                <Label text="Username" style="-fx-text-fill: white;"/>
+                <TextField fx:id="usernameField" promptText="Enter your username"/>
+                
+                <Label text="Password" style="-fx-text-fill: white;"/>
+                <PasswordField fx:id="passwordField" promptText="Enter your password"/>
+            </VBox>
+
+            <HBox spacing="15.0" alignment="CENTER">
+                <Button text="Login" onAction="#handleLogin" defaultButton="true" prefWidth="100"/>
+                <Button text="Register" onAction="#openRegister" prefWidth="100"/>
+            </HBox>
+
+            <Label fx:id="errorLabel" styleClass="alert-label"/>
+        </VBox>
+    </children>
+</AnchorPane>

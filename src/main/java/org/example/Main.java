@@ -98,7 +98,7 @@ public class Main {
                 List<Product> products = PRODUCT_DAO.getAllProducts();
                 List<Product> toDelete = products.stream()
                         .filter(p -> p.getName().equalsIgnoreCase(name))
-                        .toList();
+                        .collect(java.util.stream.Collectors.toList());
 
                 if (toDelete.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No product found with name: " + name);
@@ -121,7 +121,7 @@ public class Main {
                 List<Product> products = PRODUCT_DAO.getAllProducts();
                 List<Product> toDelete = products.stream()
                         .filter(p -> p.getCategory().equalsIgnoreCase(category))
-                        .toList();
+                        .collect(java.util.stream.Collectors.toList());
 
                 if (toDelete.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No products found in category: " + category);
@@ -226,7 +226,7 @@ public class Main {
                 List<Product> products = PRODUCT_DAO.getAllProducts();
                 matched = products.stream()
                         .filter(p -> p.getName().equalsIgnoreCase(name))
-                        .toList();
+                        .collect(java.util.stream.Collectors.toList());
                 if (matched.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No product found with name: " + name);
                 }
@@ -237,7 +237,7 @@ public class Main {
                 List<Product> products = PRODUCT_DAO.getAllProducts();
                 matched = products.stream()
                         .filter(p -> p.getCategory().equalsIgnoreCase(category))
-                        .toList();
+                        .collect(java.util.stream.Collectors.toList());
                 if (matched.isEmpty()) {
                     throw new ProductNotFoundException("⚠️ No products found in category: " + category);
                 }
@@ -248,7 +248,7 @@ public class Main {
                 double maxPrice = readDouble("💲 Enter maximum price: ");
                 matched = PRODUCT_DAO.getAllProducts().stream()
                         .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)
-                        .toList();
+                        .collect(java.util.stream.Collectors.toList());
             }
 
             case 5 -> {

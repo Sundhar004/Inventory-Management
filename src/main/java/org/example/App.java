@@ -1,4 +1,4 @@
-package org.example;
+ package org.example;
 
 import org.example.dao.ProductDAOImpl;
 import org.example.model.Product;
@@ -272,7 +272,7 @@ public class App {
             List<Product> all = productDAO.getAllProducts();
             List<Product> matched = all.stream()
                     .filter(p -> p.getName().equalsIgnoreCase(name))
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
 
             if (matched.isEmpty()) {
                 System.out.println("⚠️ No products found with name: " + name);
@@ -292,7 +292,7 @@ public class App {
             List<Product> all = productDAO.getAllProducts();
             List<Product> matched = all.stream()
                     .filter(p -> p.getCategory().equalsIgnoreCase(category))
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
 
             if (matched.isEmpty()) {
                 System.out.println("⚠️ No products found in category: " + category);
@@ -322,7 +322,7 @@ public class App {
             List<Product> products = productDAO.getAllProducts()
                     .stream()
                     .filter(p -> p.getPrice() >= min && p.getPrice() <= max)
-                    .toList();
+                    .collect(java.util.stream.Collectors.toList());
             printProductsTable(products);
         } catch (Exception e) {
             System.err.println("💥 Error filtering products: " + e.getMessage());

@@ -9,17 +9,13 @@ public class DBConnection {
     // ✅ Single reusable connection instance
     private static Connection connection;
 
-    /**
-     * Returns a valid database connection using environment variables.
-     * Ensures only one connection instance exists throughout the application.
-     */
     public static Connection getConnection() throws SQLException {
         try {
             if (connection == null || connection.isClosed()) {
 
                 // ✅ Load environment variables
                 String url = System.getenv("DBLink");
-                String user = System.getenv("USERNAME");
+                String user = System.getenv("DBUSER");
                 String pass = System.getenv("PASSWORD");
 
                 // ✅ Validate environment variables
@@ -38,13 +34,12 @@ public class DBConnection {
 
                 // ✅ Establish database connection
                 connection = DriverManager.getConnection(url, user, pass);
-//                System.out.println("✅ Database connected successfully!");
+                // System.out.println("✅ Database connected successfully!");
             }
         } catch (SQLException e) {
             System.err.println("💥 Database connection failed: " + e.getMessage());
             throw e;
         }
-
         return connection;
     }
 

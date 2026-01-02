@@ -119,7 +119,7 @@ public class AppTest {
     public void testPaginationHelper() {
         List<Product> dummy = java.util.stream.IntStream.range(1, 21)
                 .mapToObj(i -> new Product(i, "P" + i, "Cat", 1, 10.0 * i))
-                .toList();
+                .collect(java.util.stream.Collectors.toList());
 
         List<Product> page2 = Main.getPaginatedProducts(dummy, 2, 10);
         Assert.assertEquals(10, page2.size());

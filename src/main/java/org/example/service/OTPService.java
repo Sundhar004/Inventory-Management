@@ -33,13 +33,9 @@ public class OTPService {
 
         // Prepare email content
         String subject = "🔐 Inventory System - Email Verification";
-        String body = """
-                <h3>Inventory Management System</h3>
-                <p>Your email verification OTP is:</p>
-                <h2 style='color:blue;'>%s</h2>
-                <p>This OTP is valid for 5 minutes.<br>
-                Do not share it with anyone.</p>
-                """.formatted(otp);
+        String body = "Your verification OTP is: <b>" + otp + "</b><br><br>"
+                + "It is valid for 5 minutes. Do not share it with anyone.";
+
 
         // Attempt to send the OTP
         try {
